@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id String @id @default(uuid()) @db.Uuid
+  nombre String
+  apellido String
+  rol String
+  email String @unique
+  telefono String @unique
+  fechaCreacion DateTime @default(now())
+  activo Boolean @default(true)
+  ticketsAbiertos Ticket[] @relation("TicketsAbiertos")
+  ticketsAsignados Ticket [] @relation("TicketsAsignados")
+  departamentoId String @db.Uuid
+  departamento Departamento @relation(fields: [departamentoId], references: [id])
+}
+
+model Ticket {
+  id String @id @default(uuid()) @db.Uuid
+  creadoPorId  String @db.Uuid
+  asignadoAId String @db.Uuid
+  creadoPor Usuario @relation("TicketsAbiertos", fields: [creadoPorId], references: [id])
+  asignadoA Usuario @relation("TicketsAsignados", fields: [asignadoAId], references: [id])
+  asunto String
+  fechaCreacion DateTime @default(now())
+  status EstadoTicket @default(ABIERTO)
+  descripcion String
+  servicioId String @db.Uuid
+  servicio CatServicios @relation(fields: [servicioId],references: [id])
+}
+
+model CatServicios{
+  id String @id @default(uuid()) @db.Uuid
+  nombre String 
+  tipo Servicios
+  tickets Ticket []
+}
+
+model Maquina {
+  id String @id @default(uuid()) @db.Uuid
+  serviceTag String @unique
+  modelo String
+  IP String
+  numeroSerie String
+  departamentoId String @db.Uuid
+  departamento Departamento @relation(fields: [departamentoId], references: [id])
+}
+
+model Departamento {
+  id String @id @default(uuid()) @db.Uuid
+  nombre String
+  usuarios Usuario[]
+  maquinas Maquina[]
+}
+
+enum EstadoTicket {
+  ABIERTO
+  EN_PROGRESO
+  ATENDIDO
+  CERRADO
+}
+
+enum Servicios {
+  SERVICIO
+  TELEFONIA 
+  HARDWARE
+  SOFTWARE
+  RED
+  IMPRESION
+}
