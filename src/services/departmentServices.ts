@@ -13,3 +13,13 @@ export const deleteDepartment = async (id: string) => {
     where: { id },
   });
 };
+
+export const findDepartmentById = async (
+  id: string
+): Promise<Departamento | null> => {
+  const department = await prisma.departamento.findUnique({
+    where: { id },
+  });
+
+    return department;
+};

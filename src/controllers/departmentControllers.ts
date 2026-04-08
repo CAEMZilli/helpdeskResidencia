@@ -63,3 +63,34 @@ export const deleteDepartment = async (
     });
   }
 };
+
+export const findDepartmentById = async (
+  req: Request<DepartmentParams>,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const department = await departmentService.findDepartmentById(id);
+
+    if (!department) {
+      res.status(404).json({
+        success: false,
+        message: "Departamento no encontrado",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: department,
+    });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Error al buscar el departamento",
+      error: error.message,
+    });
+  }
+};
