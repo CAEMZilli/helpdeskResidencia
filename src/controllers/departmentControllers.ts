@@ -2,6 +2,10 @@ import type { Request, Response } from "express";
 import { Prisma } from "../generated/prisma/client";
 import * as departmentService from "../services/departmentServices";
 
+type DepartmentParams = {
+  id: string;
+};
+
 export const createDepartment = async (
   req: Request,
   res: Response
@@ -22,6 +26,39 @@ export const createDepartment = async (
     res.status(500).json({
       success: false,
       message: "Error al crear el departamento",
+      error: error.message,
+    });
+  }
+};
+
+export const deleteDepartment = async (
+  req: Request<DepartmentParams>,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const deletedDepartment = await departmentService.deleteDepartment(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Departamento eliminado correctamente",
+      data: deletedDepartment,
+    });
+  } catch (error: any) {
+    console.error(error);
+
+    if (error.code === "P2025") {
+      res.status(404).json({
+        success: false,
+        message: "Departamento no encontrado",
+      });
+      return;
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Error al eliminar el departamento",
       error: error.message,
     });
   }
