@@ -9,3 +9,10 @@ export const findDepartment = async (id: string): Promise<Departamento> => {
     return department! 
 
 }
+
+export const createDepartment = async (
+  data: Prisma.DepartamentoCreateInput
+): Promise<Departamento> => {
+  const newDepartment = await prisma.departamento.create({ data });
+  return newDepartment;
+};
