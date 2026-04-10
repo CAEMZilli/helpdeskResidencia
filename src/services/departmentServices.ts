@@ -23,3 +23,8 @@ export const findDepartmentById = async (
 
     return department;
 };
+
+export const findAllDepartments = async (): Promise<Departamento[]> => {
+  const departments = await prisma.departamento.findMany();
+  return departments;
+};

@@ -94,3 +94,24 @@ export const findDepartmentById = async (
     });
   }
 };
+
+export const findAllDepartments = async (
+  _req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const departments = await departmentService.findAllDepartments();
+
+    res.status(200).json({
+      success: true,
+      data: departments,
+    });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener los departamentos",
+      error: error.message,
+    });
+  }
+};
