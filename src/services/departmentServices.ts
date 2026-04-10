@@ -28,3 +28,15 @@ export const findAllDepartments = async (): Promise<Departamento[]> => {
   const departments = await prisma.departamento.findMany();
   return departments;
 };
+
+export const updateDepartment = async (
+  id: string,
+  data: Prisma.DepartamentoUpdateInput
+): Promise<Departamento> => {
+  const updatedDepartment = await prisma.departamento.update({
+    where: { id },
+    data,
+  });
+
+  return updatedDepartment;
+};

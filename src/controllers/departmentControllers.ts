@@ -115,3 +115,39 @@ export const findAllDepartments = async (
     });
   }
 };
+
+export const updateDepartment = async (
+  req: Request<DepartmentParams>,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { nombre } = req.body;
+
+    const updatedDepartment = await departmentService.updateDepartment(id, {
+      nombre,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Departamento actualizado correctamente",
+      data: updatedDepartment,
+    });
+  } catch (error: any) {
+    console.error(error);
+
+    if (error.code === "P2025") {
+      res.status(404).json({
+        success: false,
+        message: "Departamento no encontrado",
+      });
+      return;
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Error al actualizar el departamento",
+      error: error.message,
+    });
+  }
+};
