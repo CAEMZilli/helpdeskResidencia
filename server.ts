@@ -11,8 +11,8 @@ app.use(express.json());
 
 app.use(helmet());  //helmet esconde informacion sobre el servidor
 
-app.use("/api/user",userRoutes)
-app.use("/api/ticket",ticketRoutes)
+app.use("/api/user",userRoutes);
+app.use("/api/ticket",ticketRoutes);
 app.use("/api/department", departmentRoutes);
 app.use("/api/machine", machineRoutes);
 
