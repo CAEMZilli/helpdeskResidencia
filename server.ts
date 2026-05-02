@@ -4,6 +4,7 @@ import userRoutes from "./src/routes/userRoutes"
 import ticketRoutes from "./src/routes/ticketRoutes"
 import departmentRoutes from "./src/routes/departmentRoutes";
 import machineRoutes from "./src/routes/machineRoutes";
+import catServicesRoutes from "./src/routes/catServicesRoutes";
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use("/api/user",userRoutes);
 app.use("/api/ticket",ticketRoutes);
 app.use("/api/department", departmentRoutes);
 app.use("/api/machine", machineRoutes);
+app.use("/api/catservices", catServicesRoutes);
 
 
 const PORT = process.env.PORT || 3000;
