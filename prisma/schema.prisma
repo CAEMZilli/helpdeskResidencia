@@ -20,33 +20,34 @@ model Usuario {
   rol String
   email String @unique
   telefono String @unique
+  password String
   fechaCreacion DateTime @default(now())
   activo Boolean @default(true)
   ticketsAbiertos Ticket[] @relation("TicketsAbiertos")
-  ticketsAsignados Ticket [] @relation("TicketsAsignados")
+  ticketsAsignados Ticket[] @relation("TicketsAsignados")
   departamentoId String @db.Uuid
   departamento Departamento @relation(fields: [departamentoId], references: [id])
 }
 
 model Ticket {
   id String @id @default(uuid()) @db.Uuid
-  creadoPorId  String @db.Uuid
-  asignadoAId String @db.Uuid
+  creadoPorId String @db.Uuid
+  asignadoAId String? @db.Uuid
   creadoPor Usuario @relation("TicketsAbiertos", fields: [creadoPorId], references: [id])
-  asignadoA Usuario @relation("TicketsAsignados", fields: [asignadoAId], references: [id])
+  asignadoA Usuario? @relation("TicketsAsignados", fields: [asignadoAId], references: [id])
   asunto String
   fechaCreacion DateTime @default(now())
   status EstadoTicket @default(ABIERTO)
   descripcion String
   servicioId String @db.Uuid
-  servicio CatServicios @relation(fields: [servicioId],references: [id])
+  servicio CatServicios @relation(fields: [servicioId], references: [id])
 }
 
-model CatServicios{
+model CatServicios {
   id String @id @default(uuid()) @db.Uuid
-  nombre String 
+  nombre String
   tipo Servicios
-  tickets Ticket []
+  tickets Ticket[]
 }
 
 model Maquina {
@@ -75,7 +76,7 @@ enum EstadoTicket {
 
 enum Servicios {
   SERVICIO
-  TELEFONIA 
+  TELEFONIA
   HARDWARE
   SOFTWARE
   RED

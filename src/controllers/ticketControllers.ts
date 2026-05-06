@@ -25,11 +25,13 @@ export const createTicket = async (
           id: creadoPor,
         },
       },
-      asignadoA: {
-        connect: {
-          id: asignadoA,
+      ...(asignadoA && {
+        asignadoA: {
+          connect: {
+            id: asignadoA,
+          },
         },
-      },
+      }),
       servicio: {
         connect: {
           id: servicio,

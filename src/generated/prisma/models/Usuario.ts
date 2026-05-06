@@ -31,6 +31,7 @@ export type UsuarioMinAggregateOutputType = {
   rol: string | null
   email: string | null
   telefono: string | null
+  password: string | null
   fechaCreacion: Date | null
   activo: boolean | null
   departamentoId: string | null
@@ -43,6 +44,7 @@ export type UsuarioMaxAggregateOutputType = {
   rol: string | null
   email: string | null
   telefono: string | null
+  password: string | null
   fechaCreacion: Date | null
   activo: boolean | null
   departamentoId: string | null
@@ -55,6 +57,7 @@ export type UsuarioCountAggregateOutputType = {
   rol: number
   email: number
   telefono: number
+  password: number
   fechaCreacion: number
   activo: number
   departamentoId: number
@@ -69,6 +72,7 @@ export type UsuarioMinAggregateInputType = {
   rol?: true
   email?: true
   telefono?: true
+  password?: true
   fechaCreacion?: true
   activo?: true
   departamentoId?: true
@@ -81,6 +85,7 @@ export type UsuarioMaxAggregateInputType = {
   rol?: true
   email?: true
   telefono?: true
+  password?: true
   fechaCreacion?: true
   activo?: true
   departamentoId?: true
@@ -93,6 +98,7 @@ export type UsuarioCountAggregateInputType = {
   rol?: true
   email?: true
   telefono?: true
+  password?: true
   fechaCreacion?: true
   activo?: true
   departamentoId?: true
@@ -178,6 +184,7 @@ export type UsuarioGroupByOutputType = {
   rol: string
   email: string
   telefono: string
+  password: string
   fechaCreacion: Date
   activo: boolean
   departamentoId: string
@@ -211,6 +218,7 @@ export type UsuarioWhereInput = {
   rol?: Prisma.StringFilter<"Usuario"> | string
   email?: Prisma.StringFilter<"Usuario"> | string
   telefono?: Prisma.StringFilter<"Usuario"> | string
+  password?: Prisma.StringFilter<"Usuario"> | string
   fechaCreacion?: Prisma.DateTimeFilter<"Usuario"> | Date | string
   activo?: Prisma.BoolFilter<"Usuario"> | boolean
   departamentoId?: Prisma.UuidFilter<"Usuario"> | string
@@ -226,6 +234,7 @@ export type UsuarioOrderByWithRelationInput = {
   rol?: Prisma.SortOrder
   email?: Prisma.SortOrder
   telefono?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   fechaCreacion?: Prisma.SortOrder
   activo?: Prisma.SortOrder
   departamentoId?: Prisma.SortOrder
@@ -244,6 +253,7 @@ export type UsuarioWhereUniqueInput = Prisma.AtLeast<{
   nombre?: Prisma.StringFilter<"Usuario"> | string
   apellido?: Prisma.StringFilter<"Usuario"> | string
   rol?: Prisma.StringFilter<"Usuario"> | string
+  password?: Prisma.StringFilter<"Usuario"> | string
   fechaCreacion?: Prisma.DateTimeFilter<"Usuario"> | Date | string
   activo?: Prisma.BoolFilter<"Usuario"> | boolean
   departamentoId?: Prisma.UuidFilter<"Usuario"> | string
@@ -259,6 +269,7 @@ export type UsuarioOrderByWithAggregationInput = {
   rol?: Prisma.SortOrder
   email?: Prisma.SortOrder
   telefono?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   fechaCreacion?: Prisma.SortOrder
   activo?: Prisma.SortOrder
   departamentoId?: Prisma.SortOrder
@@ -277,6 +288,7 @@ export type UsuarioScalarWhereWithAggregatesInput = {
   rol?: Prisma.StringWithAggregatesFilter<"Usuario"> | string
   email?: Prisma.StringWithAggregatesFilter<"Usuario"> | string
   telefono?: Prisma.StringWithAggregatesFilter<"Usuario"> | string
+  password?: Prisma.StringWithAggregatesFilter<"Usuario"> | string
   fechaCreacion?: Prisma.DateTimeWithAggregatesFilter<"Usuario"> | Date | string
   activo?: Prisma.BoolWithAggregatesFilter<"Usuario"> | boolean
   departamentoId?: Prisma.UuidWithAggregatesFilter<"Usuario"> | string
@@ -289,6 +301,7 @@ export type UsuarioCreateInput = {
   rol: string
   email: string
   telefono: string
+  password: string
   fechaCreacion?: Date | string
   activo?: boolean
   ticketsAbiertos?: Prisma.TicketCreateNestedManyWithoutCreadoPorInput
@@ -303,6 +316,7 @@ export type UsuarioUncheckedCreateInput = {
   rol: string
   email: string
   telefono: string
+  password: string
   fechaCreacion?: Date | string
   activo?: boolean
   departamentoId: string
@@ -317,6 +331,7 @@ export type UsuarioUpdateInput = {
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefono?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   fechaCreacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ticketsAbiertos?: Prisma.TicketUpdateManyWithoutCreadoPorNestedInput
@@ -331,6 +346,7 @@ export type UsuarioUncheckedUpdateInput = {
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefono?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   fechaCreacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   departamentoId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -345,6 +361,7 @@ export type UsuarioCreateManyInput = {
   rol: string
   email: string
   telefono: string
+  password: string
   fechaCreacion?: Date | string
   activo?: boolean
   departamentoId: string
@@ -357,6 +374,7 @@ export type UsuarioUpdateManyMutationInput = {
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefono?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   fechaCreacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activo?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
@@ -368,6 +386,7 @@ export type UsuarioUncheckedUpdateManyInput = {
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefono?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   fechaCreacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   departamentoId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -380,6 +399,7 @@ export type UsuarioCountOrderByAggregateInput = {
   rol?: Prisma.SortOrder
   email?: Prisma.SortOrder
   telefono?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   fechaCreacion?: Prisma.SortOrder
   activo?: Prisma.SortOrder
   departamentoId?: Prisma.SortOrder
@@ -392,6 +412,7 @@ export type UsuarioMaxOrderByAggregateInput = {
   rol?: Prisma.SortOrder
   email?: Prisma.SortOrder
   telefono?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   fechaCreacion?: Prisma.SortOrder
   activo?: Prisma.SortOrder
   departamentoId?: Prisma.SortOrder
@@ -404,6 +425,7 @@ export type UsuarioMinOrderByAggregateInput = {
   rol?: Prisma.SortOrder
   email?: Prisma.SortOrder
   telefono?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   fechaCreacion?: Prisma.SortOrder
   activo?: Prisma.SortOrder
   departamentoId?: Prisma.SortOrder
@@ -412,6 +434,11 @@ export type UsuarioMinOrderByAggregateInput = {
 export type UsuarioScalarRelationFilter = {
   is?: Prisma.UsuarioWhereInput
   isNot?: Prisma.UsuarioWhereInput
+}
+
+export type UsuarioNullableScalarRelationFilter = {
+  is?: Prisma.UsuarioWhereInput | null
+  isNot?: Prisma.UsuarioWhereInput | null
 }
 
 export type UsuarioListRelationFilter = {
@@ -456,10 +483,12 @@ export type UsuarioUpdateOneRequiredWithoutTicketsAbiertosNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UsuarioUpdateToOneWithWhereWithoutTicketsAbiertosInput, Prisma.UsuarioUpdateWithoutTicketsAbiertosInput>, Prisma.UsuarioUncheckedUpdateWithoutTicketsAbiertosInput>
 }
 
-export type UsuarioUpdateOneRequiredWithoutTicketsAsignadosNestedInput = {
+export type UsuarioUpdateOneWithoutTicketsAsignadosNestedInput = {
   create?: Prisma.XOR<Prisma.UsuarioCreateWithoutTicketsAsignadosInput, Prisma.UsuarioUncheckedCreateWithoutTicketsAsignadosInput>
   connectOrCreate?: Prisma.UsuarioCreateOrConnectWithoutTicketsAsignadosInput
   upsert?: Prisma.UsuarioUpsertWithoutTicketsAsignadosInput
+  disconnect?: Prisma.UsuarioWhereInput | boolean
+  delete?: Prisma.UsuarioWhereInput | boolean
   connect?: Prisma.UsuarioWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UsuarioUpdateToOneWithWhereWithoutTicketsAsignadosInput, Prisma.UsuarioUpdateWithoutTicketsAsignadosInput>, Prisma.UsuarioUncheckedUpdateWithoutTicketsAsignadosInput>
 }
@@ -513,6 +542,7 @@ export type UsuarioCreateWithoutTicketsAbiertosInput = {
   rol: string
   email: string
   telefono: string
+  password: string
   fechaCreacion?: Date | string
   activo?: boolean
   ticketsAsignados?: Prisma.TicketCreateNestedManyWithoutAsignadoAInput
@@ -526,6 +556,7 @@ export type UsuarioUncheckedCreateWithoutTicketsAbiertosInput = {
   rol: string
   email: string
   telefono: string
+  password: string
   fechaCreacion?: Date | string
   activo?: boolean
   departamentoId: string
@@ -544,6 +575,7 @@ export type UsuarioCreateWithoutTicketsAsignadosInput = {
   rol: string
   email: string
   telefono: string
+  password: string
   fechaCreacion?: Date | string
   activo?: boolean
   ticketsAbiertos?: Prisma.TicketCreateNestedManyWithoutCreadoPorInput
@@ -557,6 +589,7 @@ export type UsuarioUncheckedCreateWithoutTicketsAsignadosInput = {
   rol: string
   email: string
   telefono: string
+  password: string
   fechaCreacion?: Date | string
   activo?: boolean
   departamentoId: string
@@ -586,6 +619,7 @@ export type UsuarioUpdateWithoutTicketsAbiertosInput = {
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefono?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   fechaCreacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ticketsAsignados?: Prisma.TicketUpdateManyWithoutAsignadoANestedInput
@@ -599,6 +633,7 @@ export type UsuarioUncheckedUpdateWithoutTicketsAbiertosInput = {
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefono?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   fechaCreacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   departamentoId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -623,6 +658,7 @@ export type UsuarioUpdateWithoutTicketsAsignadosInput = {
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefono?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   fechaCreacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ticketsAbiertos?: Prisma.TicketUpdateManyWithoutCreadoPorNestedInput
@@ -636,6 +672,7 @@ export type UsuarioUncheckedUpdateWithoutTicketsAsignadosInput = {
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefono?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   fechaCreacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   departamentoId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -649,6 +686,7 @@ export type UsuarioCreateWithoutDepartamentoInput = {
   rol: string
   email: string
   telefono: string
+  password: string
   fechaCreacion?: Date | string
   activo?: boolean
   ticketsAbiertos?: Prisma.TicketCreateNestedManyWithoutCreadoPorInput
@@ -662,6 +700,7 @@ export type UsuarioUncheckedCreateWithoutDepartamentoInput = {
   rol: string
   email: string
   telefono: string
+  password: string
   fechaCreacion?: Date | string
   activo?: boolean
   ticketsAbiertos?: Prisma.TicketUncheckedCreateNestedManyWithoutCreadoPorInput
@@ -704,6 +743,7 @@ export type UsuarioScalarWhereInput = {
   rol?: Prisma.StringFilter<"Usuario"> | string
   email?: Prisma.StringFilter<"Usuario"> | string
   telefono?: Prisma.StringFilter<"Usuario"> | string
+  password?: Prisma.StringFilter<"Usuario"> | string
   fechaCreacion?: Prisma.DateTimeFilter<"Usuario"> | Date | string
   activo?: Prisma.BoolFilter<"Usuario"> | boolean
   departamentoId?: Prisma.UuidFilter<"Usuario"> | string
@@ -716,6 +756,7 @@ export type UsuarioCreateManyDepartamentoInput = {
   rol: string
   email: string
   telefono: string
+  password: string
   fechaCreacion?: Date | string
   activo?: boolean
 }
@@ -727,6 +768,7 @@ export type UsuarioUpdateWithoutDepartamentoInput = {
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefono?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   fechaCreacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ticketsAbiertos?: Prisma.TicketUpdateManyWithoutCreadoPorNestedInput
@@ -740,6 +782,7 @@ export type UsuarioUncheckedUpdateWithoutDepartamentoInput = {
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefono?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   fechaCreacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ticketsAbiertos?: Prisma.TicketUncheckedUpdateManyWithoutCreadoPorNestedInput
@@ -753,6 +796,7 @@ export type UsuarioUncheckedUpdateManyWithoutDepartamentoInput = {
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefono?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   fechaCreacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activo?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
@@ -804,6 +848,7 @@ export type UsuarioSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   rol?: boolean
   email?: boolean
   telefono?: boolean
+  password?: boolean
   fechaCreacion?: boolean
   activo?: boolean
   departamentoId?: boolean
@@ -820,6 +865,7 @@ export type UsuarioSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   rol?: boolean
   email?: boolean
   telefono?: boolean
+  password?: boolean
   fechaCreacion?: boolean
   activo?: boolean
   departamentoId?: boolean
@@ -833,6 +879,7 @@ export type UsuarioSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   rol?: boolean
   email?: boolean
   telefono?: boolean
+  password?: boolean
   fechaCreacion?: boolean
   activo?: boolean
   departamentoId?: boolean
@@ -846,12 +893,13 @@ export type UsuarioSelectScalar = {
   rol?: boolean
   email?: boolean
   telefono?: boolean
+  password?: boolean
   fechaCreacion?: boolean
   activo?: boolean
   departamentoId?: boolean
 }
 
-export type UsuarioOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nombre" | "apellido" | "rol" | "email" | "telefono" | "fechaCreacion" | "activo" | "departamentoId", ExtArgs["result"]["usuario"]>
+export type UsuarioOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nombre" | "apellido" | "rol" | "email" | "telefono" | "password" | "fechaCreacion" | "activo" | "departamentoId", ExtArgs["result"]["usuario"]>
 export type UsuarioInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ticketsAbiertos?: boolean | Prisma.Usuario$ticketsAbiertosArgs<ExtArgs>
   ticketsAsignados?: boolean | Prisma.Usuario$ticketsAsignadosArgs<ExtArgs>
@@ -879,6 +927,7 @@ export type $UsuarioPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     rol: string
     email: string
     telefono: string
+    password: string
     fechaCreacion: Date
     activo: boolean
     departamentoId: string
@@ -1314,6 +1363,7 @@ export interface UsuarioFieldRefs {
   readonly rol: Prisma.FieldRef<"Usuario", 'String'>
   readonly email: Prisma.FieldRef<"Usuario", 'String'>
   readonly telefono: Prisma.FieldRef<"Usuario", 'String'>
+  readonly password: Prisma.FieldRef<"Usuario", 'String'>
   readonly fechaCreacion: Prisma.FieldRef<"Usuario", 'DateTime'>
   readonly activo: Prisma.FieldRef<"Usuario", 'Boolean'>
   readonly departamentoId: Prisma.FieldRef<"Usuario", 'String'>

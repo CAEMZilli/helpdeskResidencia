@@ -824,6 +824,7 @@ export const UsuarioScalarFieldEnum = {
   rol: 'rol',
   email: 'email',
   telefono: 'telefono',
+  password: 'password',
   fechaCreacion: 'fechaCreacion',
   activo: 'activo',
   departamentoId: 'departamentoId'
@@ -889,6 +890,14 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
 

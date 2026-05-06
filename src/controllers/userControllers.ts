@@ -4,7 +4,7 @@ import * as userService from "../services/userServices";
 
 export const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { nombre, apellido, rol, email, telefono, departamento } = req.body;
+    const { nombre, apellido, rol, email, telefono, password, departamento } = req.body;
 
     const newUser = await userService.createUser({
       nombre,
@@ -12,6 +12,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
       rol,
       email,
       telefono,
+      password,
       departamento: {
         connect: {
           id: departamento,
@@ -32,7 +33,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     ) {
       res.status(400).json({
         success: false,
-        message: "El correo ya está registrado",
+        message: "El correo o teléfono ya está registrado",
       });
       return;
     }
@@ -105,7 +106,7 @@ export const updateUser = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const { nombre, apellido, rol, email, telefono, activo, departamento } =
+    const { nombre, apellido, rol, email, telefono, password, activo, departamento } =
       req.body;
 
     const existingUser = await userService.getUserById(id);
@@ -124,6 +125,7 @@ export const updateUser = async (
       rol,
       email,
       telefono,
+      password,
       activo,
       ...(departamento && {
         departamento: {
