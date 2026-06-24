@@ -4,8 +4,8 @@ info:
   version: "1.0.0"
   description: "API de Helpdesk para el control de tickets, usuarios, departamentos, máquinas y catálogo de servicios."
 servers:
-  - url: "http://localhost:3000"
-    description: "Servidor de desarrollo local"
+  - url: "http://142.93.54.0"
+    description: "Servidor de Produccion"
 paths:
   /api/auth/login:
     post:

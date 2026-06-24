@@ -1,3 +1,4 @@
+import cors from "cors"
 import express from "express"
 import helmet from "helmet"
 import userRoutes from "./src/routes/userRoutes"
@@ -11,7 +12,7 @@ import { authMiddleware } from "./src/middleware/authMiddleware";
 const app = express();
 
 app.use(express.json());
-
+app.use(cors());
 app.use(helmet());  //helmet esconde informacion sobre el servidor
 
 app.use("/api/auth", authRoutes);
