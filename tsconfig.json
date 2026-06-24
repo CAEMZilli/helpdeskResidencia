@@ -2,12 +2,12 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
-    // "rootDir": "./src",
-    // "outDir": "./dist",
+    "rootDir": "./",
+    "outDir": "./dist",
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "ESNext",
+    "module": "CommonJS",
     "target": "ES2023",
     "types": [],
     // For nodejs:
@@ -35,13 +35,12 @@
     // Recommended Options
     "strict": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "esModuleInterop": true,
-    "ignoreDeprecations": "6.0"
-  }
+    "moduleResolution": "node",
+    "esModuleInterop": true
+  },
+  "exclude": ["node_modules", "dist"]
 }
