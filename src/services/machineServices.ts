@@ -1,5 +1,5 @@
 import { prisma } from "../config/db";
-import type { Maquina, Prisma } from "../generated/prisma/client";
+import type { Maquina, Prisma } from "@prisma/client";
 
 type MachineWithDepartment = Prisma.MaquinaGetPayload<{
   include: { departamento: true };

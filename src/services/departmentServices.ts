@@ -1,5 +1,5 @@
 import { prisma } from "../config/db"
-import type { Departamento, Prisma } from "../generated/prisma/client"
+import type { Departamento, Prisma } from "@prisma/client"
 
 export const createDepartment = async (
   data: Prisma.DepartamentoCreateInput

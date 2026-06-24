@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
-import { Prisma, Servicios } from "../generated/prisma/client";
+import { Prisma, Servicios } from "@prisma/client";
 import * as catServiceService from "../services/catServicesServices";
+import { isNonEmptyString, sanitizeString } from "../utils/validators";
 
 export const createCatService = async (
   req: Request,
@@ -9,8 +10,26 @@ export const createCatService = async (
   try {
     const { nombre, tipo } = req.body;
 
+    if (!isNonEmptyString(nombre) || !isNonEmptyString(tipo)) {
+      res.status(400).json({
+        success: false,
+        message: "El nombre y el tipo del servicio son requeridos y deben ser válidos.",
+      });
+      return;
+    }
+
+    if (!Object.values(Servicios).includes(tipo as any)) {
+      res.status(400).json({
+        success: false,
+        message: "El tipo de servicio proporcionado no es válido.",
+      });
+      return;
+    }
+
+    const cleanNombre = sanitizeString(nombre);
+
     const newCatService = await catServiceService.createCatService({
-      nombre,
+      nombre: cleanNombre,
       tipo: tipo as Servicios,
     });
 
@@ -101,8 +120,23 @@ export const updateCatService = async (
       return;
     }
 
+    if (nombre !== undefined && !isNonEmptyString(nombre)) {
+      res.status(400).json({ success: false, message: "El nombre no puede estar vacío." });
+      return;
+    }
+
+    if (tipo !== undefined && !Object.values(Servicios).includes(tipo as any)) {
+      res.status(400).json({
+        success: false,
+        message: "El tipo de servicio proporcionado no es válido.",
+      });
+      return;
+    }
+
+    const cleanNombre = nombre !== undefined ? sanitizeString(nombre) : undefined;
+
     const updateData: Prisma.CatServiciosUpdateInput = {
-      nombre,
+      ...(cleanNombre !== undefined && { nombre: cleanNombre }),
       ...(tipo && { tipo: tipo as Servicios }),
     };
 

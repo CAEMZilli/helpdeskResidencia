@@ -1,5 +1,5 @@
 import { prisma } from "../config/db";
-import type { Ticket, Prisma } from "../generated/prisma/client";
+import type { Ticket, Prisma } from "@prisma/client";
 
 type TicketWithRelations = Prisma.TicketGetPayload<{
   include: {

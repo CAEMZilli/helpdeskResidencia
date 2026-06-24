@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
-import { Prisma, EstadoTicket } from "../generated/prisma/client";
+import { Prisma, EstadoTicket } from "@prisma/client";
 import * as ticketService from "../services/ticketServices";
+import { isNonEmptyString, sanitizeString } from "../utils/validators";
 
 export const createTicket = async (
   req: Request,
@@ -16,25 +17,52 @@ export const createTicket = async (
       servicio,
     } = req.body;
 
+    if (
+      !isNonEmptyString(creadoPor) ||
+      !isNonEmptyString(asunto) ||
+      !isNonEmptyString(descripcion) ||
+      !isNonEmptyString(servicio)
+    ) {
+      res.status(400).json({
+        success: false,
+        message: "Los campos creadoPor, asunto, descripcion y servicio son obligatorios y deben ser válidos.",
+      });
+      return;
+    }
+
+    if (status !== undefined && !Object.values(EstadoTicket).includes(status as any)) {
+      res.status(400).json({
+        success: false,
+        message: "El estado proporcionado para el ticket no es válido.",
+      });
+      return;
+    }
+
+    const cleanAsunto = sanitizeString(asunto);
+    const cleanDescripcion = sanitizeString(descripcion);
+    const cleanCreadoPor = sanitizeString(creadoPor);
+    const cleanServicio = sanitizeString(servicio);
+    const cleanAsignadoA = asignadoA ? sanitizeString(asignadoA) : undefined;
+
     const newTicket = await ticketService.createTicket({
-      asunto,
-      descripcion,
+      asunto: cleanAsunto,
+      descripcion: cleanDescripcion,
       ...(status && { status: status as EstadoTicket }),
       creadoPor: {
         connect: {
-          id: creadoPor,
+          id: cleanCreadoPor,
         },
       },
-      ...(asignadoA && {
+      ...(cleanAsignadoA && {
         asignadoA: {
           connect: {
-            id: asignadoA,
+            id: cleanAsignadoA,
           },
         },
       }),
       servicio: {
         connect: {
-          id: servicio,
+          id: cleanServicio,
         },
       },
     });
@@ -133,28 +161,60 @@ export const updateTicket = async (
       return;
     }
 
+    if (asunto !== undefined && !isNonEmptyString(asunto)) {
+      res.status(400).json({ success: false, message: "El asunto no puede estar vacío." });
+      return;
+    }
+    if (descripcion !== undefined && !isNonEmptyString(descripcion)) {
+      res.status(400).json({ success: false, message: "La descripción no puede estar vacía." });
+      return;
+    }
+    if (creadoPor !== undefined && !isNonEmptyString(creadoPor)) {
+      res.status(400).json({ success: false, message: "El creador (creadoPor) no puede estar vacío." });
+      return;
+    }
+    if (servicio !== undefined && !isNonEmptyString(servicio)) {
+      res.status(400).json({ success: false, message: "El servicio no puede estar vacío." });
+      return;
+    }
+
+    if (status !== undefined && !Object.values(EstadoTicket).includes(status as any)) {
+      res.status(400).json({
+        success: false,
+        message: "El estado proporcionado para el ticket no es válido.",
+      });
+      return;
+    }
+
+    const cleanAsunto = asunto !== undefined ? sanitizeString(asunto) : undefined;
+    const cleanDescripcion = descripcion !== undefined ? sanitizeString(descripcion) : undefined;
+    const cleanCreadoPor = creadoPor !== undefined ? sanitizeString(creadoPor) : undefined;
+    const cleanServicio = servicio !== undefined ? sanitizeString(servicio) : undefined;
+
+    // Desasignación: si viene asignadoA como null o "", desconectamos. Si viene un ID válido, conectamos.
+    let asignadoAUpdate: Prisma.UsuarioUpdateOneWithoutTicketsAsignadosNestedInput | undefined;
+    if (asignadoA === null || asignadoA === "") {
+      asignadoAUpdate = { disconnect: true };
+    } else if (isNonEmptyString(asignadoA)) {
+      asignadoAUpdate = { connect: { id: sanitizeString(asignadoA) } };
+    }
+
     const updateData: Prisma.TicketUpdateInput = {
-      asunto,
-      descripcion,
+      ...(cleanAsunto !== undefined && { asunto: cleanAsunto }),
+      ...(cleanDescripcion !== undefined && { descripcion: cleanDescripcion }),
       ...(status && { status: status as EstadoTicket }),
-      ...(creadoPor && {
+      ...(cleanCreadoPor && {
         creadoPor: {
           connect: {
-            id: creadoPor,
+            id: cleanCreadoPor,
           },
         },
       }),
-      ...(asignadoA && {
-        asignadoA: {
-          connect: {
-            id: asignadoA,
-          },
-        },
-      }),
-      ...(servicio && {
+      ...(asignadoAUpdate && { asignadoA: asignadoAUpdate }),
+      ...(cleanServicio && {
         servicio: {
           connect: {
-            id: servicio,
+            id: cleanServicio,
           },
         },
       }),

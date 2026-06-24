@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
-import { Prisma } from "../generated/prisma/client";
+import { Prisma } from "@prisma/client";
 import * as departmentService from "../services/departmentServices";
+import { isNonEmptyString, sanitizeString } from "../utils/validators";
 
 type DepartmentParams = {
   id: string;
@@ -13,8 +14,18 @@ export const createDepartment = async (
   try {
     const { nombre } = req.body;
 
+    if (!isNonEmptyString(nombre)) {
+      res.status(400).json({
+        success: false,
+        message: "El nombre del departamento es requerido.",
+      });
+      return;
+    }
+
+    const cleanNombre = sanitizeString(nombre);
+
     const newDepartment = await departmentService.createDepartment({
-      nombre,
+      nombre: cleanNombre,
     });
 
     res.status(201).json({
@@ -47,6 +58,14 @@ export const deleteDepartment = async (
     });
   } catch (error: any) {
     console.error(error);
+
+    if (error.code === "P2003") {
+      res.status(400).json({
+        success: false,
+        message: "No se puede eliminar el departamento porque tiene usuarios o máquinas asociados.",
+      });
+      return;
+    }
 
     if (error.code === "P2025") {
       res.status(404).json({
@@ -124,8 +143,18 @@ export const updateDepartment = async (
     const { id } = req.params;
     const { nombre } = req.body;
 
+    if (nombre !== undefined && !isNonEmptyString(nombre)) {
+      res.status(400).json({
+        success: false,
+        message: "El nombre del departamento no puede estar vacío.",
+      });
+      return;
+    }
+
+    const cleanNombre = nombre !== undefined ? sanitizeString(nombre) : undefined;
+
     const updatedDepartment = await departmentService.updateDepartment(id, {
-      nombre,
+      ...(cleanNombre !== undefined && { nombre: cleanNombre }),
     });
 
     res.status(200).json({

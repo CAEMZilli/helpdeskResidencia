@@ -1,21 +1,56 @@
 import type { Request, Response } from "express";
-import { Prisma } from "../generated/prisma/client";
+import { Prisma } from "@prisma/client";
 import * as userService from "../services/userServices";
+import bcrypt from "bcryptjs";
+import { isNonEmptyString, isValidEmail, sanitizeString } from "../utils/validators";
 
 export const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { nombre, apellido, rol, email, telefono, password, departamento } = req.body;
 
+    if (
+      !isNonEmptyString(nombre) ||
+      !isNonEmptyString(apellido) ||
+      !isNonEmptyString(rol) ||
+      !isNonEmptyString(email) ||
+      !isNonEmptyString(telefono) ||
+      !isNonEmptyString(password) ||
+      !isNonEmptyString(departamento)
+    ) {
+      res.status(400).json({
+        success: false,
+        message: "Todos los campos son requeridos y deben ser válidos.",
+      });
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      res.status(400).json({
+        success: false,
+        message: "El correo electrónico tiene un formato inválido.",
+      });
+      return;
+    }
+
+    const cleanNombre = sanitizeString(nombre);
+    const cleanApellido = sanitizeString(apellido);
+    const cleanRol = sanitizeString(rol);
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanTelefono = sanitizeString(telefono);
+    const cleanDepartamento = sanitizeString(departamento);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = await userService.createUser({
-      nombre,
-      apellido,
-      rol,
-      email,
-      telefono,
-      password,
+      nombre: cleanNombre,
+      apellido: cleanApellido,
+      rol: cleanRol,
+      email: cleanEmail,
+      telefono: cleanTelefono,
+      password: hashedPassword,
       departamento: {
         connect: {
-          id: departamento,
+          id: cleanDepartamento,
         },
       },
     });
@@ -119,18 +154,60 @@ export const updateUser = async (
       return;
     }
 
+    if (email !== undefined && !isValidEmail(email)) {
+      res.status(400).json({
+        success: false,
+        message: "El correo electrónico tiene un formato inválido.",
+      });
+      return;
+    }
+
+    if (nombre !== undefined && !isNonEmptyString(nombre)) {
+      res.status(400).json({ success: false, message: "El nombre no puede estar vacío." });
+      return;
+    }
+    if (apellido !== undefined && !isNonEmptyString(apellido)) {
+      res.status(400).json({ success: false, message: "El apellido no puede estar vacío." });
+      return;
+    }
+    if (rol !== undefined && !isNonEmptyString(rol)) {
+      res.status(400).json({ success: false, message: "El rol no puede estar vacío." });
+      return;
+    }
+    if (telefono !== undefined && !isNonEmptyString(telefono)) {
+      res.status(400).json({ success: false, message: "El teléfono no puede estar vacío." });
+      return;
+    }
+    if (password !== undefined && !isNonEmptyString(password)) {
+      res.status(400).json({ success: false, message: "La contraseña no puede estar vacía." });
+      return;
+    }
+    if (departamento !== undefined && !isNonEmptyString(departamento)) {
+      res.status(400).json({ success: false, message: "El departamento no puede estar vacío." });
+      return;
+    }
+
+    const cleanNombre = nombre !== undefined ? sanitizeString(nombre) : undefined;
+    const cleanApellido = apellido !== undefined ? sanitizeString(apellido) : undefined;
+    const cleanRol = rol !== undefined ? sanitizeString(rol) : undefined;
+    const cleanEmail = email !== undefined ? email.trim().toLowerCase() : undefined;
+    const cleanTelefono = telefono !== undefined ? sanitizeString(telefono) : undefined;
+    const cleanDepartamento = departamento !== undefined ? sanitizeString(departamento) : undefined;
+
+    const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
+
     const updateData: Prisma.UsuarioUpdateInput = {
-      nombre,
-      apellido,
-      rol,
-      email,
-      telefono,
-      password,
-      activo,
-      ...(departamento && {
+      ...(cleanNombre !== undefined && { nombre: cleanNombre }),
+      ...(cleanApellido !== undefined && { apellido: cleanApellido }),
+      ...(cleanRol !== undefined && { rol: cleanRol }),
+      ...(cleanEmail !== undefined && { email: cleanEmail }),
+      ...(cleanTelefono !== undefined && { telefono: cleanTelefono }),
+      ...(hashedPassword && { password: hashedPassword }),
+      ...(activo !== undefined && { activo }),
+      ...(cleanDepartamento && {
         departamento: {
           connect: {
-            id: departamento,
+            id: cleanDepartamento,
           },
         },
       }),
@@ -202,6 +279,17 @@ export const deleteUser = async (
     });
   } catch (error: any) {
     console.error(error);
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2003"
+    ) {
+      res.status(400).json({
+        success: false,
+        message: "No se puede eliminar el usuario porque tiene tickets asociados.",
+      });
+      return;
+    }
 
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&

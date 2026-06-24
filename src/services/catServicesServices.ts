@@ -1,5 +1,5 @@
 import { prisma } from "../config/db";
-import type { CatServicios, Prisma } from "../generated/prisma/client";
+import type { CatServicios, Prisma } from "@prisma/client";
 
 type CatServiceWithTickets = Prisma.CatServiciosGetPayload<{
   include: { tickets: true };

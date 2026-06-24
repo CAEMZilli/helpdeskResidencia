@@ -5,6 +5,8 @@ import ticketRoutes from "./src/routes/ticketRoutes"
 import departmentRoutes from "./src/routes/departmentRoutes";
 import machineRoutes from "./src/routes/machineRoutes";
 import catServicesRoutes from "./src/routes/catServicesRoutes";
+import authRoutes from "./src/routes/authRoutes";
+import { authMiddleware } from "./src/middleware/authMiddleware";
 
 const app = express();
 
@@ -12,8 +14,13 @@ app.use(express.json());
 
 app.use(helmet());  //helmet esconde informacion sobre el servidor
 
-app.use("/api/user",userRoutes);
-app.use("/api/ticket",ticketRoutes);
+app.use("/api/auth", authRoutes);
+
+// Aplicar middleware de autenticación a todas las rutas protegidas siguientes
+app.use(authMiddleware);
+
+app.use("/api/user", userRoutes);
+app.use("/api/ticket", ticketRoutes);
 app.use("/api/department", departmentRoutes);
 app.use("/api/machine", machineRoutes);
 app.use("/api/catservices", catServicesRoutes);
