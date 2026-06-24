@@ -17,9 +17,9 @@ app.use(helmet());  //helmet esconde informacion sobre el servidor
 app.use("/api/auth", authRoutes);
 
 // Aplicar middleware de autenticación a todas las rutas protegidas siguientes
-app.use(authMiddleware);
 
 app.use("/api/user", userRoutes);
+app.use(authMiddleware); 
 app.use("/api/ticket", ticketRoutes);
 app.use("/api/department", departmentRoutes);
 app.use("/api/machine", machineRoutes);
