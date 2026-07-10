@@ -1,0 +1,135 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/public-sans";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Public Sans Variable', sans-serif;
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/*
+  Paleta institucional Secretaría del Bienestar / IMSS-Bienestar:
+  Verde Bienestar Oscuro #10312B · Verde Medio #006657 · Dorado/Ocre #BC955C
+  Beige Claro #DDC9A3 · Guinda Oficial #9F2241 · Dorado Secundario #A57F2C
+*/
+:root {
+    --background: #FFFFFF;
+    --foreground: #10312B;
+    --card: #FFFFFF;
+    --card-foreground: #10312B;
+    --popover: #FFFFFF;
+    --popover-foreground: #10312B;
+    --primary: #006657;
+    --primary-foreground: #FFFFFF;
+    --secondary: #F4EEE1;
+    --secondary-foreground: #10312B;
+    --muted: #F4EEE1;
+    --muted-foreground: #6B6357;
+    --accent: #EFE1C8;
+    --accent-foreground: #10312B;
+    --destructive: #9F2241;
+    --border: #E6DCC6;
+    --input: #E6DCC6;
+    --ring: #006657;
+    --chart-1: #006657;
+    --chart-2: #BC955C;
+    --chart-3: #9F2241;
+    --chart-4: #10312B;
+    --chart-5: #A57F2C;
+    --radius: 0.625rem;
+    --sidebar: #10312B;
+    --sidebar-foreground: #EFE6D3;
+    --sidebar-primary: #BC955C;
+    --sidebar-primary-foreground: #10312B;
+    --sidebar-accent: #184A40;
+    --sidebar-accent-foreground: #FFFFFF;
+    --sidebar-border: #1D4A40;
+    --sidebar-ring: #BC955C;
+}
+
+.dark {
+    --background: #0B1F1B;
+    --foreground: #EFE6D3;
+    --card: #102A24;
+    --card-foreground: #EFE6D3;
+    --popover: #102A24;
+    --popover-foreground: #EFE6D3;
+    --primary: #1C9C82;
+    --primary-foreground: #062119;
+    --secondary: #1B3A32;
+    --secondary-foreground: #EFE6D3;
+    --muted: #1B3A32;
+    --muted-foreground: #A9B6B0;
+    --accent: #3A2E18;
+    --accent-foreground: #EFE6D3;
+    --destructive: #C0466A;
+    --border: color-mix(in oklch, #EFE6D3 12%, transparent);
+    --input: color-mix(in oklch, #EFE6D3 15%, transparent);
+    --ring: #BC955C;
+    --chart-1: #1C9C82;
+    --chart-2: #D4B074;
+    --chart-3: #C0466A;
+    --chart-4: #EFE6D3;
+    --chart-5: #C79A46;
+    --sidebar: #081613;
+    --sidebar-foreground: #EFE6D3;
+    --sidebar-primary: #BC955C;
+    --sidebar-primary-foreground: #10312B;
+    --sidebar-accent: #14322B;
+    --sidebar-accent-foreground: #EFE6D3;
+    --sidebar-border: color-mix(in oklch, #EFE6D3 8%, transparent);
+    --sidebar-ring: #BC955C;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    }
+  html {
+    @apply font-sans;
+    }
+}

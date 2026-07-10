@@ -1,12 +1,15 @@
 import { prisma } from "../config/db";
 import type { Ticket, Prisma } from "@prisma/client";
 
+const ticketRelationsInclude = {
+  creadoPor: { include: { departamento: true } },
+  asignadoA: { include: { departamento: true } },
+  servicio: true,
+  maquina: true,
+} satisfies Prisma.TicketInclude;
+
 type TicketWithRelations = Prisma.TicketGetPayload<{
-  include: {
-    creadoPor: true;
-    asignadoA: true;
-    servicio: true;
-  };
+  include: typeof ticketRelationsInclude;
 }>;
 
 export const createTicket = async (
@@ -18,11 +21,7 @@ export const createTicket = async (
 
 export const getAllTickets = async (): Promise<TicketWithRelations[]> => {
   const tickets = await prisma.ticket.findMany({
-    include: {
-      creadoPor: true,
-      asignadoA: true,
-      servicio: true,
-    },
+    include: ticketRelationsInclude,
   });
 
   return tickets;
@@ -33,11 +32,7 @@ export const getTicketById = async (
 ): Promise<TicketWithRelations | null> => {
   const ticket = await prisma.ticket.findUnique({
     where: { id },
-    include: {
-      creadoPor: true,
-      asignadoA: true,
-      servicio: true,
-    },
+    include: ticketRelationsInclude,
   });
 
   return ticket;

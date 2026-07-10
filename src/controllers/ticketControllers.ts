@@ -15,6 +15,7 @@ export const createTicket = async (
       descripcion,
       status,
       servicio,
+      maquina,
     } = req.body;
 
     if (
@@ -43,6 +44,7 @@ export const createTicket = async (
     const cleanCreadoPor = sanitizeString(creadoPor);
     const cleanServicio = sanitizeString(servicio);
     const cleanAsignadoA = asignadoA ? sanitizeString(asignadoA) : undefined;
+    const cleanMaquina = maquina ? sanitizeString(maquina) : undefined;
 
     const newTicket = await ticketService.createTicket({
       asunto: cleanAsunto,
@@ -65,6 +67,13 @@ export const createTicket = async (
           id: cleanServicio,
         },
       },
+      ...(cleanMaquina && {
+        maquina: {
+          connect: {
+            id: cleanMaquina,
+          },
+        },
+      }),
     });
 
     res.status(201).json({
@@ -149,6 +158,7 @@ export const updateTicket = async (
       descripcion,
       status,
       servicio,
+      maquina,
     } = req.body;
 
     const existingTicket = await ticketService.getTicketById(id);
@@ -199,10 +209,28 @@ export const updateTicket = async (
       asignadoAUpdate = { connect: { id: sanitizeString(asignadoA) } };
     }
 
+    // Misma semántica que asignadoA: null/"" desconecta la máquina, un ID válido la (re)conecta.
+    let maquinaUpdate: Prisma.MaquinaUpdateOneWithoutTicketsNestedInput | undefined;
+    if (maquina === null || maquina === "") {
+      maquinaUpdate = { disconnect: true };
+    } else if (isNonEmptyString(maquina)) {
+      maquinaUpdate = { connect: { id: sanitizeString(maquina) } };
+    }
+
+    // fechaCierre se gestiona automáticamente a partir del cambio de status:
+    // se marca al cerrar, y se limpia si el ticket se reabre.
+    let fechaCierreUpdate: Date | null | undefined;
+    if (status === "CERRADO" && existingTicket.status !== "CERRADO") {
+      fechaCierreUpdate = new Date();
+    } else if (status && status !== "CERRADO" && existingTicket.status === "CERRADO") {
+      fechaCierreUpdate = null;
+    }
+
     const updateData: Prisma.TicketUpdateInput = {
       ...(cleanAsunto !== undefined && { asunto: cleanAsunto }),
       ...(cleanDescripcion !== undefined && { descripcion: cleanDescripcion }),
       ...(status && { status: status as EstadoTicket }),
+      ...(fechaCierreUpdate !== undefined && { fechaCierre: fechaCierreUpdate }),
       ...(cleanCreadoPor && {
         creadoPor: {
           connect: {
@@ -218,6 +246,7 @@ export const updateTicket = async (
           },
         },
       }),
+      ...(maquinaUpdate && { maquina: maquinaUpdate }),
     };
 
     const updatedTicket = await ticketService.updateTicket(id, updateData);

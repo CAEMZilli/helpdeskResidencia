@@ -362,6 +362,12 @@ paths:
                   format: uuid
                   description: "ID del servicio del catálogo"
                   example: "123e4567-e89b-12d3-a456-426614174002"
+                maquina:
+                  type: string
+                  format: uuid
+                  description: "ID de la máquina sobre la que se reporta el problema (opcional)"
+                  nullable: true
+                  example: "m1n2o3p4-q5r6-7s8t-9u0v-1w2x3y4z5a6b"
               required:
                 - creadoPor
                 - asunto
@@ -482,7 +488,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       summary: "Actualizar ticket por ID"
-      description: "Modifica los campos de un ticket específico. Permite desasignar el ticket enviando el campo asignadoA como null o vacío. Requiere autenticación JWT."
+      description: "Modifica los campos de un ticket específico. Permite desasignar el ticket (o desvincular la máquina) enviando asignadoA/maquina como null o vacío. El campo fechaCierre se gestiona automáticamente: se registra al cambiar status a CERRADO y se limpia si se reabre. Requiere autenticación JWT."
       tags:
         - "Tickets"
       security:
@@ -516,6 +522,12 @@ paths:
                   type: string
                   format: uuid
                   example: "123e4567-e89b-12d3-a456-426614174002"
+                maquina:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: "ID de la máquina. Enviar null o string vacío para desvincularla."
+                  example: "m1n2o3p4-q5r6-7s8t-9u0v-1w2x3y4z5a6b"
       responses:
         '200':
           description: "Ticket actualizado exitosamente"
@@ -1448,6 +1460,12 @@ components:
           type: string
           format: date-time
           example: "2026-06-24T13:30:00.000Z"
+        fechaCierre:
+          type: string
+          format: date-time
+          nullable: true
+          description: "Fecha y hora en que el ticket pasó a estatus CERRADO. Se gestiona automáticamente: se registra al cerrar y se limpia si se reabre."
+          example: "2026-06-25T09:15:00.000Z"
         status:
           $ref: '#/components/schemas/EstadoTicket'
         descripcion:
@@ -1457,6 +1475,12 @@ components:
           type: string
           format: uuid
           example: "123e4567-e89b-12d3-a456-426614174002"
+        maquinaId:
+          type: string
+          format: uuid
+          nullable: true
+          description: "ID de la máquina reportada (opcional)"
+          example: "m1n2o3p4-q5r6-7s8t-9u0v-1w2x3y4z5a6b"
 
     TicketWithRelations:
       allOf:
@@ -1464,13 +1488,17 @@ components:
         - type: object
           properties:
             creadoPor:
-              $ref: '#/components/schemas/Usuario'
+              $ref: '#/components/schemas/UsuarioWithDepartamento'
             asignadoA:
               allOf:
-                - $ref: '#/components/schemas/Usuario'
+                - $ref: '#/components/schemas/UsuarioWithDepartamento'
               nullable: true
             servicio:
               $ref: '#/components/schemas/CatServicios'
+            maquina:
+              allOf:
+                - $ref: '#/components/schemas/MaquinaWithDepartment'
+              nullable: true
 
     Maquina:
       type: object

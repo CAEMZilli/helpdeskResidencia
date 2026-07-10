@@ -36,10 +36,13 @@ model Ticket {
   asignadoA Usuario? @relation("TicketsAsignados", fields: [asignadoAId], references: [id])
   asunto String
   fechaCreacion DateTime @default(now())
+  fechaCierre DateTime?
   status EstadoTicket @default(ABIERTO)
   descripcion String
   servicioId String @db.Uuid
   servicio CatServicios @relation(fields: [servicioId], references: [id])
+  maquinaId String? @db.Uuid
+  maquina Maquina? @relation(fields: [maquinaId], references: [id])
 }
 
 model CatServicios {
@@ -57,6 +60,7 @@ model Maquina {
   numeroSerie String
   departamentoId String @db.Uuid
   departamento Departamento @relation(fields: [departamentoId], references: [id])
+  tickets Ticket[]
 }
 
 model Departamento {
