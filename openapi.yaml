@@ -488,7 +488,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       summary: "Actualizar ticket por ID"
-      description: "Modifica los campos de un ticket específico. Permite desasignar el ticket (o desvincular la máquina) enviando asignadoA/maquina como null o vacío. El campo fechaCierre se gestiona automáticamente: se registra al cambiar status a CERRADO y se limpia si se reabre. Requiere autenticación JWT."
+      description: "Modifica los campos de un ticket específico. Permite desasignar el ticket (o desvincular la máquina) enviando asignadoA/maquina como null o vacío. El campo fechaCierre se gestiona automáticamente: se registra al cambiar status a CERRADO y se limpia si se reabre. Al cambiar status a CERRADO, notaCierre es obligatorio (400 si falta o está vacío). Requiere autenticación JWT."
       tags:
         - "Tickets"
       security:
@@ -528,6 +528,10 @@ paths:
                   nullable: true
                   description: "ID de la máquina. Enviar null o string vacío para desvincularla."
                   example: "m1n2o3p4-q5r6-7s8t-9u0v-1w2x3y4z5a6b"
+                notaCierre:
+                  type: string
+                  description: "Reporte de cierre. Obligatorio cuando status cambia a CERRADO."
+                  example: "Se reemplazó el cable de poder dañado y se verificó el encendido correcto del equipo."
       responses:
         '200':
           description: "Ticket actualizado exitosamente"
@@ -1481,6 +1485,11 @@ components:
           nullable: true
           description: "ID de la máquina reportada (opcional)"
           example: "m1n2o3p4-q5r6-7s8t-9u0v-1w2x3y4z5a6b"
+        notaCierre:
+          type: string
+          nullable: true
+          description: "Reporte de cierre escrito por el técnico. Obligatorio al cambiar status a CERRADO."
+          example: "Se reemplazó el cable de poder dañado y se verificó el encendido correcto del equipo."
 
     TicketWithRelations:
       allOf:

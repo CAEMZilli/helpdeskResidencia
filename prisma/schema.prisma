@@ -37,6 +37,7 @@ model Ticket {
   asunto String
   fechaCreacion DateTime @default(now())
   fechaCierre DateTime?
+  notaCierre String?
   status EstadoTicket @default(ABIERTO)
   descripcion String
   servicioId String @db.Uuid

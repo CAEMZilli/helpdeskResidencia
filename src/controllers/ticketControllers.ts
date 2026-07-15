@@ -159,6 +159,7 @@ export const updateTicket = async (
       status,
       servicio,
       maquina,
+      notaCierre,
     } = req.body;
 
     const existingTicket = await ticketService.getTicketById(id);
@@ -196,10 +197,20 @@ export const updateTicket = async (
       return;
     }
 
+    // Al cerrar un ticket (transición hacia CERRADO) es obligatorio un reporte de cierre.
+    if (status === "CERRADO" && existingTicket.status !== "CERRADO" && !isNonEmptyString(notaCierre)) {
+      res.status(400).json({
+        success: false,
+        message: "Debes escribir un reporte de cierre para poder cerrar el ticket.",
+      });
+      return;
+    }
+
     const cleanAsunto = asunto !== undefined ? sanitizeString(asunto) : undefined;
     const cleanDescripcion = descripcion !== undefined ? sanitizeString(descripcion) : undefined;
     const cleanCreadoPor = creadoPor !== undefined ? sanitizeString(creadoPor) : undefined;
     const cleanServicio = servicio !== undefined ? sanitizeString(servicio) : undefined;
+    const cleanNotaCierre = isNonEmptyString(notaCierre) ? sanitizeString(notaCierre) : undefined;
 
     // Desasignación: si viene asignadoA como null o "", desconectamos. Si viene un ID válido, conectamos.
     let asignadoAUpdate: Prisma.UsuarioUpdateOneWithoutTicketsAsignadosNestedInput | undefined;
@@ -231,6 +242,7 @@ export const updateTicket = async (
       ...(cleanDescripcion !== undefined && { descripcion: cleanDescripcion }),
       ...(status && { status: status as EstadoTicket }),
       ...(fechaCierreUpdate !== undefined && { fechaCierre: fechaCierreUpdate }),
+      ...(cleanNotaCierre !== undefined && { notaCierre: cleanNotaCierre }),
       ...(cleanCreadoPor && {
         creadoPor: {
           connect: {

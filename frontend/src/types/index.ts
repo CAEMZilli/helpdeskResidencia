@@ -46,6 +46,7 @@ export interface Ticket {
   descripcion: string;
   fechaCreacion: string;
   fechaCierre: string | null;
+  notaCierre: string | null;
   status: EstadoTicket;
   servicioId: string;
   maquinaId: string | null;

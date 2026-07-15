@@ -19,6 +19,7 @@ export interface UpdateTicketInput {
   status?: EstadoTicket;
   servicio?: string;
   maquina?: string | null;
+  notaCierre?: string;
 }
 
 export async function getAllTickets(): Promise<Ticket[]> {

@@ -1,11 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTickets } from "@/hooks/useTickets";
 import { useUsers } from "@/hooks/useUsers";
+import { useDepartments } from "@/hooks/useDepartments";
+import { usePagination } from "@/hooks/usePagination";
 import { ESTADO_LABELS, normalizeRol } from "@/constants/roles";
 import { ESTADOS_TICKET } from "@/types";
 import { TicketStatusBadge } from "@/components/tickets/TicketStatusBadge";
+import { TicketNoteDialog } from "@/components/tickets/TicketNoteDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TablePagination } from "@/components/ui/table-pagination";
 import {
   Select,
   SelectContent,
@@ -22,8 +26,10 @@ const ALL = "__ALL__";
 export function DashboardPage() {
   const { data: tickets, isLoading: loadingTickets } = useTickets();
   const { data: users, isLoading: loadingUsers } = useUsers();
+  const { data: departments } = useDepartments();
   const [tecnicoFilter, setTecnicoFilter] = useState(ALL);
   const [statusFilter, setStatusFilter] = useState<string>(ALL);
+  const [departamentoFilter, setDepartamentoFilter] = useState(ALL);
 
   const tecnicos = useMemo(
     () => (users ?? []).filter((u) => normalizeRol(u.rol) === "TECNICO"),
@@ -44,8 +50,18 @@ export function DashboardPage() {
     return (tickets ?? [])
       .filter((t) => tecnicoFilter === ALL || t.asignadoAId === tecnicoFilter)
       .filter((t) => statusFilter === ALL || t.status === statusFilter)
+      .filter(
+        (t) => departamentoFilter === ALL || t.creadoPor?.departamentoId === departamentoFilter
+      )
       .sort((a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime());
-  }, [tickets, tecnicoFilter, statusFilter]);
+  }, [tickets, tecnicoFilter, statusFilter, departamentoFilter]);
+
+  const pagination = usePagination(filteredTickets, 20);
+
+  useEffect(() => {
+    pagination.setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tecnicoFilter, statusFilter, departamentoFilter]);
 
   const isLoading = loadingTickets || loadingUsers;
 
@@ -89,7 +105,7 @@ export function DashboardPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-3">
           <CardTitle>Todos los tickets</CardTitle>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Select value={tecnicoFilter} onValueChange={setTecnicoFilter}>
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Filtrar por técnico" />
@@ -99,6 +115,19 @@ export function DashboardPage() {
                 {tecnicos.map((t) => (
                   <SelectItem key={t.id} value={t.id}>
                     {t.nombre} {t.apellido}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={departamentoFilter} onValueChange={setDepartamentoFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filtrar por departamento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>Todos los departamentos</SelectItem>
+                {departments?.map((d) => (
+                  <SelectItem key={d.id} value={d.id}>
+                    {d.nombre}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -124,46 +153,59 @@ export function DashboardPage() {
           ) : filteredTickets.length === 0 ? (
             <p className="text-sm text-muted-foreground">No hay tickets que coincidan con el filtro.</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Asunto</TableHead>
-                  <TableHead>Creado por</TableHead>
-                  <TableHead>Departamento</TableHead>
-                  <TableHead>Máquina</TableHead>
-                  <TableHead>Técnico</TableHead>
-                  <TableHead>Creado</TableHead>
-                  <TableHead>Cerrado</TableHead>
-                  <TableHead>Estatus</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTickets.map((ticket) => (
-                  <TableRow key={ticket.id}>
-                    <TableCell className="font-medium">{ticket.asunto}</TableCell>
-                    <TableCell>
-                      {ticket.creadoPor
-                        ? `${ticket.creadoPor.nombre} ${ticket.creadoPor.apellido}`
-                        : "—"}
-                    </TableCell>
-                    <TableCell>{ticket.creadoPor?.departamento?.nombre ?? "—"}</TableCell>
-                    <TableCell>
-                      {ticket.maquina ? `${ticket.maquina.modelo} (${ticket.maquina.serviceTag})` : "—"}
-                    </TableCell>
-                    <TableCell>
-                      {ticket.asignadoA
-                        ? `${ticket.asignadoA.nombre} ${ticket.asignadoA.apellido}`
-                        : "Sin asignar"}
-                    </TableCell>
-                    <TableCell>{formatDateTime(ticket.fechaCreacion)}</TableCell>
-                    <TableCell>{formatDateTime(ticket.fechaCierre)}</TableCell>
-                    <TableCell>
-                      <TicketStatusBadge status={ticket.status} />
-                    </TableCell>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Asunto</TableHead>
+                    <TableHead>Creado por</TableHead>
+                    <TableHead>Departamento</TableHead>
+                    <TableHead>Máquina</TableHead>
+                    <TableHead>Técnico</TableHead>
+                    <TableHead>Creado</TableHead>
+                    <TableHead>Cerrado</TableHead>
+                    <TableHead>Estatus</TableHead>
+                    <TableHead>Reporte</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {pagination.pageItems.map((ticket) => (
+                    <TableRow key={ticket.id}>
+                      <TableCell className="font-medium">{ticket.asunto}</TableCell>
+                      <TableCell>
+                        {ticket.creadoPor
+                          ? `${ticket.creadoPor.nombre} ${ticket.creadoPor.apellido}`
+                          : "—"}
+                      </TableCell>
+                      <TableCell>{ticket.creadoPor?.departamento?.nombre ?? "—"}</TableCell>
+                      <TableCell>
+                        {ticket.maquina ? `${ticket.maquina.modelo} (${ticket.maquina.serviceTag})` : "—"}
+                      </TableCell>
+                      <TableCell>
+                        {ticket.asignadoA
+                          ? `${ticket.asignadoA.nombre} ${ticket.asignadoA.apellido}`
+                          : "Sin asignar"}
+                      </TableCell>
+                      <TableCell>{formatDateTime(ticket.fechaCreacion)}</TableCell>
+                      <TableCell>{formatDateTime(ticket.fechaCierre)}</TableCell>
+                      <TableCell>
+                        <TicketStatusBadge status={ticket.status} />
+                      </TableCell>
+                      <TableCell>
+                        <TicketNoteDialog ticket={ticket} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <TablePagination
+                page={pagination.page}
+                totalPages={pagination.totalPages}
+                totalItems={pagination.totalItems}
+                pageSize={pagination.pageSize}
+                onPageChange={pagination.setPage}
+              />
+            </>
           )}
         </CardContent>
       </Card>
