@@ -29,6 +29,7 @@ export interface UpdateUserInput {
   password?: string;
   activo?: boolean;
   departamento?: string;
+  correoSecundario?: string | null;
 }
 
 export async function getAllUsers(): Promise<Usuario[]> {

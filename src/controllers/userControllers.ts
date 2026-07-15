@@ -141,7 +141,7 @@ export const updateUser = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const { nombre, apellido, rol, email, telefono, password, activo, departamento } =
+    const { nombre, apellido, rol, email, telefono, password, activo, departamento, correoSecundario } =
       req.body;
 
     const existingUser = await userService.getUserById(id);
@@ -186,6 +186,19 @@ export const updateUser = async (
       res.status(400).json({ success: false, message: "El departamento no puede estar vacío." });
       return;
     }
+    // correoSecundario es opcional: null/"" lo limpia, un valor debe ser email válido.
+    if (
+      correoSecundario !== undefined &&
+      correoSecundario !== null &&
+      correoSecundario !== "" &&
+      !isValidEmail(correoSecundario)
+    ) {
+      res.status(400).json({
+        success: false,
+        message: "El correo secundario tiene un formato inválido.",
+      });
+      return;
+    }
 
     const cleanNombre = nombre !== undefined ? sanitizeString(nombre) : undefined;
     const cleanApellido = apellido !== undefined ? sanitizeString(apellido) : undefined;
@@ -193,6 +206,12 @@ export const updateUser = async (
     const cleanEmail = email !== undefined ? email.trim().toLowerCase() : undefined;
     const cleanTelefono = telefono !== undefined ? sanitizeString(telefono) : undefined;
     const cleanDepartamento = departamento !== undefined ? sanitizeString(departamento) : undefined;
+    const cleanCorreoSecundario =
+      correoSecundario === undefined
+        ? undefined
+        : correoSecundario === null || correoSecundario === ""
+          ? null
+          : correoSecundario.trim().toLowerCase();
 
     const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
 
@@ -202,6 +221,7 @@ export const updateUser = async (
       ...(cleanRol !== undefined && { rol: cleanRol }),
       ...(cleanEmail !== undefined && { email: cleanEmail }),
       ...(cleanTelefono !== undefined && { telefono: cleanTelefono }),
+      ...(cleanCorreoSecundario !== undefined && { correoSecundario: cleanCorreoSecundario }),
       ...(hashedPassword && { password: hashedPassword }),
       ...(activo !== undefined && { activo }),
       ...(cleanDepartamento && {

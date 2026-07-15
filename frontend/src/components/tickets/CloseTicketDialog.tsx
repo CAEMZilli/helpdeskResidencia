@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { FileDown } from "lucide-react";
 import { useUpdateTicket } from "@/hooks/useTickets";
 import { apiErrorMessage } from "@/api/client";
 import { useAuthStore } from "@/store/authStore";
@@ -16,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DictamenDialog } from "@/components/tickets/DictamenDialog";
 import type { Ticket } from "@/types";
 
 const closeSchema = z.object({
@@ -34,13 +37,17 @@ interface CloseTicketDialogProps {
 export function CloseTicketDialog({ ticket, onOpenChange }: CloseTicketDialogProps) {
   const { user } = useAuthStore();
   const updateTicket = useUpdateTicket();
+  const [dictamenOpen, setDictamenOpen] = useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<CloseForm>({ resolver: zodResolver(closeSchema) });
+
+  const notaActual = watch("notaCierre") ?? "";
 
   const onSubmit = async (values: CloseForm) => {
     if (!ticket) return;
@@ -113,12 +120,30 @@ export function CloseTicketDialog({ ticket, onOpenChange }: CloseTicketDialogPro
                   <p className="text-xs text-destructive">{errors.notaCierre.message}</p>
                 )}
               </div>
-              <DialogFooter>
+              <p className="text-xs text-muted-foreground">
+                ¿La falla requirió reemplazar una pieza o equipo? Genera el dictamen técnico
+                oficial antes o después de cerrar.
+              </p>
+              <DialogFooter className="sm:justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDictamenOpen(true)}
+                >
+                  <FileDown className="size-4" />
+                  Generar dictamen técnico
+                </Button>
                 <Button type="submit" disabled={updateTicket.isPending}>
                   {updateTicket.isPending ? "Cerrando..." : "Cerrar ticket"}
                 </Button>
               </DialogFooter>
             </form>
+            <DictamenDialog
+              ticket={ticket}
+              reporte={notaActual}
+              open={dictamenOpen}
+              onOpenChange={setDictamenOpen}
+            />
           </>
         )}
       </DialogContent>

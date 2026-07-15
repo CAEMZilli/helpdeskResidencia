@@ -237,6 +237,12 @@ paths:
                 telefono:
                   type: string
                   example: "2281234567"
+                correoSecundario:
+                  type: string
+                  format: email
+                  nullable: true
+                  description: "Correo de contacto alterno. Enviar null o string vacío para quitarlo."
+                  example: "juan.personal@ejemplo.com"
                 password:
                   type: string
                   format: password
@@ -1403,6 +1409,12 @@ components:
           type: string
           format: email
           example: "juan.perez@ejemplo.com"
+        correoSecundario:
+          type: string
+          format: email
+          nullable: true
+          description: "Correo de contacto alterno (opcional)"
+          example: "juan.personal@ejemplo.com"
         telefono:
           type: string
           example: "2281234567"

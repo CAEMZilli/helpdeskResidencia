@@ -25,6 +25,7 @@ export interface Usuario {
   apellido: string;
   rol: Rol | string;
   email: string;
+  correoSecundario?: string | null;
   telefono: string;
   fechaCreacion: string;
   activo: boolean;

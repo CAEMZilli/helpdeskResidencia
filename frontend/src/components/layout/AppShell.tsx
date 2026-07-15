@@ -13,11 +13,18 @@ export interface NavItem {
 }
 
 interface AppShellProps {
-  title: string;
+  subtitle: string;
   navItems: NavItem[];
 }
 
-export function AppShell({ title, navItems }: AppShellProps) {
+function saludoPorHora(): string {
+  const hora = new Date().getHours();
+  if (hora < 12) return "Buenos días";
+  if (hora < 19) return "Buenas tardes";
+  return "Buenas noches";
+}
+
+export function AppShell({ subtitle, navItems }: AppShellProps) {
   const { user, logout } = useAuthStore();
 
   return (
@@ -70,8 +77,12 @@ export function AppShell({ title, navItems }: AppShellProps) {
         </div>
       </aside>
       <div className="flex flex-col min-w-0">
-        <header className="bg-card px-6 py-4 border-b-2 border-accent">
-          <h1 className="text-lg font-semibold">{title}</h1>
+        <header className="bg-card px-6 py-3 border-b-2 border-accent">
+          <h1 className="text-lg font-semibold leading-tight">
+            {saludoPorHora()}
+            {user?.nombre ? `, ${user.nombre}` : ""}
+          </h1>
+          <p className="text-xs text-muted-foreground">{subtitle}</p>
         </header>
         <main className="flex-1 p-6 overflow-auto bg-secondary/40">
           <Outlet />

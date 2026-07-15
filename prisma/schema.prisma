@@ -18,6 +18,7 @@ model Usuario {
   apellido String
   rol String
   email String @unique
+  correoSecundario String?
   telefono String @unique
   password String
   fechaCreacion DateTime @default(now())
