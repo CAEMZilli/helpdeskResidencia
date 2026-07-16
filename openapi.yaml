@@ -1,0 +1,1622 @@
+openapi: 3.0.0
+info:
+  title: "Helpdesk Residencia API"
+  version: "1.0.0"
+  description: "API de Helpdesk para el control de tickets, usuarios, departamentos, máquinas y catálogo de servicios."
+servers:
+  - url: "http://142.93.54.0"
+    description: "Servidor de Produccion"
+paths:
+  /api/auth/login:
+    post:
+      summary: "Iniciar sesión"
+      description: "Autentica a un usuario utilizando su correo electrónico y contraseña. Retorna los datos básicos del usuario y un token JWT válido por 1 día."
+      tags:
+        - "Autenticación"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "usuario@ejemplo.com"
+                password:
+                  type: string
+                  format: password
+                  example: "miContraseñaSuperSegura"
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: "Inicio de sesión exitoso"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Inicio de sesión exitoso"
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/UsuarioSimple'
+                      token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyM2U0NTY3LWU4OWItMTJkMy1hNDU2LTQyNjYxNDE3NDAwMCIsImVtYWlsIjoidXN1YXJpb0BlamVtcGxvLmNvbSIsInJvbCI6IlRFQ05JQ08ifQ.exampleToken"
+        '400':
+          description: "Solicitud incorrecta (correo o contraseña faltantes)"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: "No autorizado (correo o contraseña incorrectos)"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/user:
+    post:
+      summary: "Crear un nuevo usuario"
+      description: "Registra un nuevo usuario en la base de datos vinculándolo a un departamento existente. Requiere JWT y rol ADMINISTRADOR. La respuesta no incluye el hash de la contraseña."
+      tags:
+        - "Usuarios"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  example: "Juan"
+                apellido:
+                  type: string
+                  example: "Pérez"
+                rol:
+                  type: string
+                  example: "TECNICO"
+                email:
+                  type: string
+                  format: email
+                  example: "juan.perez@ejemplo.com"
+                telefono:
+                  type: string
+                  example: "2281234567"
+                password:
+                  type: string
+                  format: password
+                  example: "contraseña123"
+                departamento:
+                  type: string
+                  format: uuid
+                  description: "ID del departamento al que pertenece el usuario"
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+              required:
+                - nombre
+                - apellido
+                - rol
+                - email
+                - telefono
+                - password
+                - departamento
+      responses:
+        '201':
+          description: "Usuario creado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Usuario'
+        '400':
+          description: "Datos inválidos o correo/teléfono ya registrados"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: "Obtener todos los usuarios"
+      description: "Obtiene la lista completa de todos los usuarios registrados, incluyendo la información del departamento de cada uno. Requiere JWT y rol ADMINISTRADOR. La respuesta no incluye el hash de la contraseña."
+      tags:
+        - "Usuarios"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Lista de usuarios obtenida exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UsuarioWithDepartamento'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/user/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: "ID del usuario"
+    get:
+      summary: "Obtener usuario por ID"
+      description: "Busca y obtiene los detalles de un usuario en específico mediante su ID, incluyendo la información de su departamento. Requiere JWT; solo el propio usuario o un ADMINISTRADOR pueden consultarlo (403 en otro caso). La respuesta no incluye el hash de la contraseña."
+      tags:
+        - "Usuarios"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Usuario encontrado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/UsuarioWithDepartamento'
+        '404':
+          description: "Usuario no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: "Actualizar usuario por ID"
+      description: "Modifica los campos proporcionados de un usuario específico. Requiere JWT. Un ADMINISTRADOR puede modificar cualquier usuario y campo; un usuario no administrador solo puede modificar su propio correoSecundario (403 si intenta editar otro usuario u otros campos). La respuesta no incluye el hash de la contraseña."
+      tags:
+        - "Usuarios"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  example: "Juan"
+                apellido:
+                  type: string
+                  example: "Pérez Actualizado"
+                rol:
+                  type: string
+                  example: "ADMINISTRADOR"
+                email:
+                  type: string
+                  format: email
+                  example: "juan.perez@ejemplo.com"
+                telefono:
+                  type: string
+                  example: "2281234567"
+                correoSecundario:
+                  type: string
+                  format: email
+                  nullable: true
+                  description: "Correo de contacto alterno. Enviar null o string vacío para quitarlo."
+                  example: "juan.personal@ejemplo.com"
+                password:
+                  type: string
+                  format: password
+                  example: "nuevaContraseña123"
+                activo:
+                  type: boolean
+                  example: true
+                departamento:
+                  type: string
+                  format: uuid
+                  description: "ID del departamento al que se desea mover el usuario"
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: "Usuario actualizado correctamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Usuario actualizado correctamente"
+                  data:
+                    $ref: '#/components/schemas/Usuario'
+        '400':
+          description: "Entrada de datos inválida o correo/teléfono ya en uso"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: "Usuario no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: "Eliminar usuario por ID"
+      description: "Elimina un usuario por su ID. No se permite eliminar si el usuario cuenta con tickets asociados en la base de datos. Requiere JWT y rol ADMINISTRADOR."
+      tags:
+        - "Usuarios"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Usuario eliminado correctamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Usuario eliminado correctamente"
+                  data:
+                    $ref: '#/components/schemas/Usuario'
+        '400':
+          description: "No se puede eliminar el usuario debido a restricciones de integridad (ej. tickets asignados/abiertos asociados)"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: "Usuario no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/ticket:
+    post:
+      summary: "Crear un nuevo ticket"
+      description: "Registra un nuevo ticket de soporte. Requiere autenticación JWT en las cabeceras."
+      tags:
+        - "Tickets"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                creadoPor:
+                  type: string
+                  format: uuid
+                  description: "ID del usuario que crea el ticket"
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                asignadoA:
+                  type: string
+                  format: uuid
+                  description: "ID del usuario asignado al ticket (opcional)"
+                  nullable: true
+                  example: "123e4567-e89b-12d3-a456-426614174001"
+                asunto:
+                  type: string
+                  example: "Falla en equipo de cómputo"
+                descripcion:
+                  type: string
+                  example: "La computadora no enciende tras un apagón"
+                status:
+                  $ref: '#/components/schemas/EstadoTicket'
+                servicio:
+                  type: string
+                  format: uuid
+                  description: "ID del servicio del catálogo"
+                  example: "123e4567-e89b-12d3-a456-426614174002"
+                maquina:
+                  type: string
+                  format: uuid
+                  description: "ID de la máquina sobre la que se reporta el problema (opcional)"
+                  nullable: true
+                  example: "m1n2o3p4-q5r6-7s8t-9u0v-1w2x3y4z5a6b"
+              required:
+                - creadoPor
+                - asunto
+                - descripcion
+                - servicio
+      responses:
+        '201':
+          description: "Ticket creado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Ticket'
+        '400':
+          description: "Datos obligatorios faltantes, estado inválido o formato incorrecto"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: "No autorizado (Token no proporcionado o inválido)"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: "Obtener todos los tickets"
+      description: "Obtiene la lista completa de todos los tickets con relaciones incluidas (creadoPor, asignadoA, servicio). Requiere autenticación JWT."
+      tags:
+        - "Tickets"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Lista de tickets obtenida exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TicketWithRelations'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/ticket/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: "ID del ticket"
+    get:
+      summary: "Obtener ticket por ID"
+      description: "Busca un ticket por su ID e incluye la información completa de relaciones (creadoPor, asignadoA, servicio). Requiere autenticación JWT."
+      tags:
+        - "Tickets"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Ticket encontrado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/TicketWithRelations'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: "Ticket no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: "Actualizar ticket por ID"
+      description: "Modifica los campos de un ticket específico. Permite desasignar el ticket (o desvincular la máquina) enviando asignadoA/maquina como null o vacío. El campo fechaCierre se gestiona automáticamente: se registra al cambiar status a CERRADO y se limpia si se reabre. Al cambiar status a CERRADO, notaCierre es obligatorio (400 si falta o está vacío). Requiere autenticación JWT."
+      tags:
+        - "Tickets"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                creadoPor:
+                  type: string
+                  format: uuid
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                asignadoA:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: "ID del usuario asignado. Enviar null o string vacío para desasignar."
+                  example: "123e4567-e89b-12d3-a456-426614174001"
+                asunto:
+                  type: string
+                  example: "Falla en equipo de cómputo actualizada"
+                descripcion:
+                  type: string
+                  example: "Se cambió el cable de poder pero sigue sin encender"
+                status:
+                  $ref: '#/components/schemas/EstadoTicket'
+                servicio:
+                  type: string
+                  format: uuid
+                  example: "123e4567-e89b-12d3-a456-426614174002"
+                maquina:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: "ID de la máquina. Enviar null o string vacío para desvincularla."
+                  example: "m1n2o3p4-q5r6-7s8t-9u0v-1w2x3y4z5a6b"
+                notaCierre:
+                  type: string
+                  description: "Reporte de cierre. Obligatorio cuando status cambia a CERRADO."
+                  example: "Se reemplazó el cable de poder dañado y se verificó el encendido correcto del equipo."
+      responses:
+        '200':
+          description: "Ticket actualizado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Ticket actualizado correctamente"
+                  data:
+                    $ref: '#/components/schemas/Ticket'
+        '400':
+          description: "Datos de entrada inválidos"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: "Ticket no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: "Eliminar ticket por ID"
+      description: "Elimina un ticket de soporte por su ID. Requiere autenticación JWT."
+      tags:
+        - "Tickets"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Ticket eliminado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Ticket eliminado correctamente"
+                  data:
+                    $ref: '#/components/schemas/Ticket'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: "Ticket no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/department:
+    post:
+      summary: "Crear un nuevo departamento"
+      description: "Registra un nuevo departamento en el sistema. Requiere autenticación JWT y rol ADMINISTRADOR."
+      tags:
+        - "Departamentos"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  example: "Recursos Humanos"
+              required:
+                - nombre
+      responses:
+        '201':
+          description: "Departamento creado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Departamento'
+        '400':
+          description: "Nombre del departamento requerido o inválido"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: "Obtener todos los departamentos"
+      description: "Obtiene la lista completa de todos los departamentos. Requiere autenticación JWT."
+      tags:
+        - "Departamentos"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Lista de departamentos obtenida exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Departamento'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/department/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: "ID del departamento"
+    get:
+      summary: "Obtener departamento por ID"
+      description: "Busca y obtiene los detalles de un departamento mediante su ID. Requiere autenticación JWT."
+      tags:
+        - "Departamentos"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Departamento encontrado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Departamento'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: "Departamento no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: "Actualizar departamento por ID"
+      description: "Modifica el nombre de un departamento. Requiere autenticación JWT y rol ADMINISTRADOR."
+      tags:
+        - "Departamentos"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  example: "Recursos Humanos Modificado"
+              required:
+                - nombre
+      responses:
+        '200':
+          description: "Departamento actualizado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Departamento actualizado correctamente"
+                  data:
+                    $ref: '#/components/schemas/Departamento'
+        '400':
+          description: "Nombre proporcionado vacío o inválido"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: "Departamento no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: "Eliminar departamento por ID"
+      description: "Elimina un departamento por su ID. No se permite eliminar departamentos que contengan usuarios o máquinas asociados. Requiere autenticación JWT y rol ADMINISTRADOR."
+      tags:
+        - "Departamentos"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Departamento eliminado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Departamento eliminado correctamente"
+                  data:
+                    $ref: '#/components/schemas/Departamento'
+        '400':
+          description: "No se puede eliminar el departamento porque tiene usuarios o máquinas asociados"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: "Departamento no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/machine:
+    post:
+      summary: "Crear una nueva máquina"
+      description: "Registra una nueva máquina de cómputo asociada a un departamento. Requiere autenticación JWT y rol ADMINISTRADOR."
+      tags:
+        - "Máquinas"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                serviceTag:
+                  type: string
+                  example: "ST123456"
+                modelo:
+                  type: string
+                  example: "OptiPlex 7090"
+                IP:
+                  type: string
+                  example: "192.168.1.50"
+                numeroSerie:
+                  type: string
+                  example: "NS987654321"
+                departamento:
+                  type: string
+                  format: uuid
+                  description: "ID del departamento al que pertenece la máquina"
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+              required:
+                - serviceTag
+                - modelo
+                - IP
+                - numeroSerie
+                - departamento
+      responses:
+        '201':
+          description: "Máquina creada exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Maquina'
+        '400':
+          description: "Datos inválidos o serviceTag ya registrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: "Obtener todas las máquinas"
+      description: "Obtiene la lista completa de máquinas registradas, incluyendo la información de sus departamentos. Requiere autenticación JWT."
+      tags:
+        - "Máquinas"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Lista de máquinas obtenida exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MaquinaWithDepartment'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/machine/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: "ID de la máquina"
+    get:
+      summary: "Obtener máquina por ID"
+      description: "Obtiene los detalles de una máquina específica mediante su ID, incluyendo la información de su departamento. Requiere autenticación JWT."
+      tags:
+        - "Máquinas"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Máquina encontrada exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/MaquinaWithDepartment'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: "Máquina no encontrada"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: "Actualizar máquina por ID"
+      description: "Modifica los campos especificados de una máquina. Requiere autenticación JWT y rol ADMINISTRADOR."
+      tags:
+        - "Máquinas"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                serviceTag:
+                  type: string
+                  example: "ST123456"
+                modelo:
+                  type: string
+                  example: "OptiPlex 7090 Modificado"
+                IP:
+                  type: string
+                  example: "192.168.1.51"
+                numeroSerie:
+                  type: string
+                  example: "NS987654321"
+                departamento:
+                  type: string
+                  format: uuid
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: "Máquina actualizada exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Máquina actualizada correctamente"
+                  data:
+                    $ref: '#/components/schemas/Maquina'
+        '400':
+          description: "Datos de entrada inválidos o serviceTag ya registrado por otra máquina"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: "Máquina no encontrada"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: "Eliminar máquina por ID"
+      description: "Elimina una máquina del sistema por su ID. Requiere autenticación JWT y rol ADMINISTRADOR."
+      tags:
+        - "Máquinas"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Máquina eliminada exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Máquina eliminada correctamente"
+                  data:
+                    $ref: '#/components/schemas/Maquina'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: "Máquina no encontrada"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/catservices:
+    post:
+      summary: "Crear un nuevo servicio de catálogo"
+      description: "Registra una nueva categoría de servicio para clasificar los tickets de soporte. Requiere autenticación JWT y rol ADMINISTRADOR."
+      tags:
+        - "Catálogo de Servicios"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  example: "Soporte Técnico Remoto"
+                tipo:
+                  $ref: '#/components/schemas/TipoServicios'
+              required:
+                - nombre
+                - tipo
+      responses:
+        '201':
+          description: "Servicio de catálogo creado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CatServicios'
+        '400':
+          description: "Campos requeridos faltantes o tipo de servicio no válido"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: "Obtener todos los servicios del catálogo"
+      description: "Obtiene el catálogo de servicios completo, incluyendo los tickets asociados a cada categoría. Requiere autenticación JWT."
+      tags:
+        - "Catálogo de Servicios"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Lista de servicios obtenida exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CatServiceWithTickets'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/catservices/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: "ID del servicio del catálogo"
+    get:
+      summary: "Obtener servicio del catálogo por ID"
+      description: "Busca y obtiene los detalles de una categoría del catálogo mediante su ID, incluyendo sus tickets asociados. Requiere autenticación JWT."
+      tags:
+        - "Catálogo de Servicios"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Servicio encontrado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CatServiceWithTickets'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: "Servicio no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: "Actualizar servicio del catálogo por ID"
+      description: "Modifica el nombre o tipo del servicio de catálogo especificado por su ID. Requiere autenticación JWT y rol ADMINISTRADOR."
+      tags:
+        - "Catálogo de Servicios"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  example: "Soporte Técnico Remoto Modificado"
+                tipo:
+                  $ref: '#/components/schemas/TipoServicios'
+      responses:
+        '200':
+          description: "Servicio actualizado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Catálogo de servicio actualizado correctamente"
+                  data:
+                    $ref: '#/components/schemas/CatServicios'
+        '400':
+          description: "Nombre vacío o tipo de servicio no válido"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: "Servicio no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: "Eliminar servicio del catálogo por ID"
+      description: "Elimina una categoría del catálogo de servicios. Requiere autenticación JWT y rol ADMINISTRADOR."
+      tags:
+        - "Catálogo de Servicios"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Servicio de catálogo eliminado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Catálogo de servicio eliminado correctamente"
+                  data:
+                    $ref: '#/components/schemas/CatServicios'
+        '401':
+          description: "No autorizado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: "Servicio no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: "Error interno del servidor"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: "http"
+      scheme: "bearer"
+      bearerFormat: "JWT"
+      description: "Proporcione el token en formato Bearer (ej. Bearer eyJhbGci...)"
+  schemas:
+    UsuarioSimple:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        nombre:
+          type: string
+          example: "Juan"
+        apellido:
+          type: string
+          example: "Pérez"
+        email:
+          type: string
+          format: email
+          example: "juan.perez@ejemplo.com"
+        rol:
+          type: string
+          example: "TECNICO"
+
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        nombre:
+          type: string
+          example: "Juan"
+        apellido:
+          type: string
+          example: "Pérez"
+        rol:
+          type: string
+          example: "TECNICO"
+        email:
+          type: string
+          format: email
+          example: "juan.perez@ejemplo.com"
+        correoSecundario:
+          type: string
+          format: email
+          nullable: true
+          description: "Correo de contacto alterno (opcional)"
+          example: "juan.personal@ejemplo.com"
+        telefono:
+          type: string
+          example: "2281234567"
+        password:
+          type: string
+          writeOnly: true
+          description: "Contraseña del usuario (encriptada con bcrypt). Solo se envía al crear/actualizar; nunca se incluye en las respuestas de la API."
+          example: "$2a$10$X729x7b/H5gIq2pP5uO7eOd8Z..."
+        fechaCreacion:
+          type: string
+          format: date-time
+          example: "2026-06-24T12:00:00.000Z"
+        activo:
+          type: boolean
+          example: true
+        departamentoId:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
+
+    UsuarioWithDepartamento:
+      allOf:
+        - $ref: '#/components/schemas/Usuario'
+        - type: object
+          properties:
+            departamento:
+              $ref: '#/components/schemas/Departamento'
+
+    Departamento:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
+        nombre:
+          type: string
+          example: "Recursos Humanos"
+
+    Ticket:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "876e5432-b89e-12d3-a456-426614174999"
+        creadoPorId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        asignadoAId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        asunto:
+          type: string
+          example: "Falla en equipo de cómputo"
+        fechaCreacion:
+          type: string
+          format: date-time
+          example: "2026-06-24T13:30:00.000Z"
+        fechaCierre:
+          type: string
+          format: date-time
+          nullable: true
+          description: "Fecha y hora en que el ticket pasó a estatus CERRADO. Se gestiona automáticamente: se registra al cerrar y se limpia si se reabre."
+          example: "2026-06-25T09:15:00.000Z"
+        status:
+          $ref: '#/components/schemas/EstadoTicket'
+        descripcion:
+          type: string
+          example: "La computadora no enciende tras un apagón"
+        servicioId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+        maquinaId:
+          type: string
+          format: uuid
+          nullable: true
+          description: "ID de la máquina reportada (opcional)"
+          example: "m1n2o3p4-q5r6-7s8t-9u0v-1w2x3y4z5a6b"
+        notaCierre:
+          type: string
+          nullable: true
+          description: "Reporte de cierre escrito por el técnico. Obligatorio al cambiar status a CERRADO."
+          example: "Se reemplazó el cable de poder dañado y se verificó el encendido correcto del equipo."
+
+    TicketWithRelations:
+      allOf:
+        - $ref: '#/components/schemas/Ticket'
+        - type: object
+          properties:
+            creadoPor:
+              $ref: '#/components/schemas/UsuarioWithDepartamento'
+            asignadoA:
+              allOf:
+                - $ref: '#/components/schemas/UsuarioWithDepartamento'
+              nullable: true
+            servicio:
+              $ref: '#/components/schemas/CatServicios'
+            maquina:
+              allOf:
+                - $ref: '#/components/schemas/MaquinaWithDepartment'
+              nullable: true
+
+    Maquina:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "m1n2o3p4-q5r6-7s8t-9u0v-1w2x3y4z5a6b"
+        serviceTag:
+          type: string
+          example: "ST123456"
+        modelo:
+          type: string
+          example: "OptiPlex 7090"
+        IP:
+          type: string
+          example: "192.168.1.50"
+        numeroSerie:
+          type: string
+          example: "NS987654321"
+        departamentoId:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
+
+    MaquinaWithDepartment:
+      allOf:
+        - $ref: '#/components/schemas/Maquina'
+        - type: object
+          properties:
+            departamento:
+              $ref: '#/components/schemas/Departamento'
+
+    CatServicios:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+        nombre:
+          type: string
+          example: "Soporte Técnico Remoto"
+        tipo:
+          $ref: '#/components/schemas/TipoServicios'
+
+    CatServiceWithTickets:
+      allOf:
+        - $ref: '#/components/schemas/CatServicios'
+        - type: object
+          properties:
+            tickets:
+              type: array
+              items:
+                $ref: '#/components/schemas/Ticket'
+
+    EstadoTicket:
+      type: string
+      enum:
+        - "ABIERTO"
+        - "EN_PROGRESO"
+        - "ATENDIDO"
+        - "CERRADO"
+      example: "ABIERTO"
+
+    TipoServicios:
+      type: string
+      enum:
+        - "SERVICIO"
+        - "TELEFONIA"
+        - "HARDWARE"
+        - "SOFTWARE"
+        - "RED"
+        - "IMPRESION"
+      example: "SOFTWARE"
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Descripción detallada del error de la petición."
+        error:
+          type: string
+          description: "Mensaje del error técnico o de la base de datos (opcional)."
+          example: "Prisma error or technical details."

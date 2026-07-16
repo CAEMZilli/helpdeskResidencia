@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:18
+    container_name: main_db
+    restart: always
+    environment:
+      POSTGRES_USER: devUser
+      POSTGRES_PASSWORD: helpdeskDevuser
+      POSTGRES_DB: helpdesk
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5431:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql
+
+volumes:
+  pg_data:
