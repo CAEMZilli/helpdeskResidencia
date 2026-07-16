@@ -12,15 +12,23 @@ import { authMiddleware } from "./src/middleware/authMiddleware";
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+
+// CORS: en producción, define CORS_ORIGIN con el/los dominios del frontend
+// (separados por coma). Sin la variable (desarrollo local) se permite cualquier
+// origen. Como la autenticación usa el header Authorization (no cookies),
+// no se requiere credentials.
+const corsOrigins = process.env.CORS_ORIGIN?.split(",").map((o) => o.trim()).filter(Boolean);
+app.use(cors(corsOrigins && corsOrigins.length > 0 ? { origin: corsOrigins } : {}));
+
 app.use(helmet());  //helmet esconde informacion sobre el servidor
 
+// Ruta pública de autenticación (login)
 app.use("/api/auth", authRoutes);
 
-// Aplicar middleware de autenticación a todas las rutas protegidas siguientes
+// A partir de aquí, todas las rutas exigen un token JWT válido.
+app.use(authMiddleware);
 
 app.use("/api/user", userRoutes);
-app.use(authMiddleware); 
 app.use("/api/ticket", ticketRoutes);
 app.use("/api/department", departmentRoutes);
 app.use("/api/machine", machineRoutes);

@@ -3,6 +3,13 @@ import { Prisma } from "@prisma/client";
 import * as userService from "../services/userServices";
 import bcrypt from "bcryptjs";
 import { isNonEmptyString, isValidEmail, sanitizeString } from "../utils/validators";
+import { normalizarRol } from "../middleware/roleMiddleware";
+
+// Nunca exponer el hash de contraseña en las respuestas de la API.
+function sinPassword<T extends { password: string }>(user: T): Omit<T, "password"> {
+  const { password: _password, ...resto } = user;
+  return resto;
+}
 
 export const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -57,7 +64,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
 
     res.status(201).json({
       success: true,
-      data: newUser,
+      data: sinPassword(newUser),
     });
   } catch (error: any) {
     console.error(error);
@@ -90,7 +97,7 @@ export const getAllUsers = async (
 
     res.status(200).json({
       success: true,
-      data: users,
+      data: users.map(sinPassword),
     });
   } catch (error: any) {
     console.error(error);
@@ -110,6 +117,17 @@ export const getUserById = async (
   try {
     const { id } = req.params;
 
+    // Solo el propio usuario o un administrador pueden consultar un perfil.
+    const esAdmin = normalizarRol(req.user?.rol) === "ADMINISTRADOR";
+    const esPropio = req.user?.id === id;
+    if (!esAdmin && !esPropio) {
+      res.status(403).json({
+        success: false,
+        message: "No tienes permiso para ver este usuario.",
+      });
+      return;
+    }
+
     const user = await userService.getUserById(id);
 
     if (!user) {
@@ -122,7 +140,7 @@ export const getUserById = async (
 
     res.status(200).json({
       success: true,
-      data: user,
+      data: sinPassword(user),
     });
   } catch (error: any) {
     console.error(error);
@@ -143,6 +161,28 @@ export const updateUser = async (
     const { id } = req.params;
     const { nombre, apellido, rol, email, telefono, password, activo, departamento, correoSecundario } =
       req.body;
+
+    // Autorización: un administrador puede editar cualquier usuario y campo;
+    // un usuario no administrador solo puede editar SU propio correo secundario.
+    const esAdmin = normalizarRol(req.user?.rol) === "ADMINISTRADOR";
+    const esPropio = req.user?.id === id;
+    if (!esAdmin && !esPropio) {
+      res.status(403).json({
+        success: false,
+        message: "No tienes permiso para modificar este usuario.",
+      });
+      return;
+    }
+    if (!esAdmin) {
+      const camposDeGestion = [nombre, apellido, rol, email, telefono, password, activo, departamento];
+      if (camposDeGestion.some((campo) => campo !== undefined)) {
+        res.status(403).json({
+          success: false,
+          message: "Solo puedes actualizar tu correo secundario.",
+        });
+        return;
+      }
+    }
 
     const existingUser = await userService.getUserById(id);
 
@@ -238,7 +278,7 @@ export const updateUser = async (
     res.status(200).json({
       success: true,
       message: "Usuario actualizado correctamente",
-      data: updatedUser,
+      data: sinPassword(updatedUser),
     });
   } catch (error: any) {
     console.error(error);
@@ -295,7 +335,7 @@ export const deleteUser = async (
     res.status(200).json({
       success: true,
       message: "Usuario eliminado correctamente",
-      data: deletedUser,
+      data: sinPassword(deletedUser),
     });
   } catch (error: any) {
     console.error(error);

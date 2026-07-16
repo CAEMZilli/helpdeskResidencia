@@ -75,9 +75,11 @@ paths:
   /api/user:
     post:
       summary: "Crear un nuevo usuario"
-      description: "Registra un nuevo usuario en la base de datos vinculándolo a un departamento existente. (Nota: Ruta no protegida por token de autenticación)."
+      description: "Registra un nuevo usuario en la base de datos vinculándolo a un departamento existente. Requiere JWT y rol ADMINISTRADOR. La respuesta no incluye el hash de la contraseña."
       tags:
         - "Usuarios"
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -145,9 +147,11 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     get:
       summary: "Obtener todos los usuarios"
-      description: "Obtiene la lista completa de todos los usuarios registrados, incluyendo la información del departamento de cada uno. (Nota: Ruta no protegida por token)."
+      description: "Obtiene la lista completa de todos los usuarios registrados, incluyendo la información del departamento de cada uno. Requiere JWT y rol ADMINISTRADOR. La respuesta no incluye el hash de la contraseña."
       tags:
         - "Usuarios"
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: "Lista de usuarios obtenida exitosamente"
@@ -181,9 +185,11 @@ paths:
         description: "ID del usuario"
     get:
       summary: "Obtener usuario por ID"
-      description: "Busca y obtiene los detalles de un usuario en específico mediante su ID, incluyendo la información de su departamento. (Nota: Ruta no protegida por token)."
+      description: "Busca y obtiene los detalles de un usuario en específico mediante su ID, incluyendo la información de su departamento. Requiere JWT; solo el propio usuario o un ADMINISTRADOR pueden consultarlo (403 en otro caso). La respuesta no incluye el hash de la contraseña."
       tags:
         - "Usuarios"
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: "Usuario encontrado exitosamente"
@@ -211,9 +217,11 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       summary: "Actualizar usuario por ID"
-      description: "Modifica los campos proporcionados de un usuario específico. Todos los campos del cuerpo de la petición son opcionales para la actualización parcial. (Nota: Ruta no protegida por token)."
+      description: "Modifica los campos proporcionados de un usuario específico. Requiere JWT. Un ADMINISTRADOR puede modificar cualquier usuario y campo; un usuario no administrador solo puede modificar su propio correoSecundario (403 si intenta editar otro usuario u otros campos). La respuesta no incluye el hash de la contraseña."
       tags:
         - "Usuarios"
+      security:
+        - bearerAuth: []
       requestBody:
         required: false
         content:
@@ -291,9 +299,11 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     delete:
       summary: "Eliminar usuario por ID"
-      description: "Elimina un usuario por su ID. No se permite eliminar si el usuario cuenta con tickets asociados en la base de datos. (Nota: Ruta no protegida por token)."
+      description: "Elimina un usuario por su ID. No se permite eliminar si el usuario cuenta con tickets asociados en la base de datos. Requiere JWT y rol ADMINISTRADOR."
       tags:
         - "Usuarios"
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: "Usuario eliminado correctamente"
@@ -623,7 +633,7 @@ paths:
   /api/department:
     post:
       summary: "Crear un nuevo departamento"
-      description: "Registra un nuevo departamento en el sistema. Requiere autenticación JWT."
+      description: "Registra un nuevo departamento en el sistema. Requiere autenticación JWT y rol ADMINISTRADOR."
       tags:
         - "Departamentos"
       security:
@@ -755,7 +765,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       summary: "Actualizar departamento por ID"
-      description: "Modifica el nombre de un departamento. Requiere autenticación JWT."
+      description: "Modifica el nombre de un departamento. Requiere autenticación JWT y rol ADMINISTRADOR."
       tags:
         - "Departamentos"
       security:
@@ -814,7 +824,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     delete:
       summary: "Eliminar departamento por ID"
-      description: "Elimina un departamento por su ID. No se permite eliminar departamentos que contengan usuarios o máquinas asociados. Requiere autenticación JWT."
+      description: "Elimina un departamento por su ID. No se permite eliminar departamentos que contengan usuarios o máquinas asociados. Requiere autenticación JWT y rol ADMINISTRADOR."
       tags:
         - "Departamentos"
       security:
@@ -863,7 +873,7 @@ paths:
   /api/machine:
     post:
       summary: "Crear una nueva máquina"
-      description: "Registra una nueva máquina de cómputo asociada a un departamento. Requiere autenticación JWT."
+      description: "Registra una nueva máquina de cómputo asociada a un departamento. Requiere autenticación JWT y rol ADMINISTRADOR."
       tags:
         - "Máquinas"
       security:
@@ -1013,7 +1023,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       summary: "Actualizar máquina por ID"
-      description: "Modifica los campos especificados de una máquina. Requiere autenticación JWT."
+      description: "Modifica los campos especificados de una máquina. Requiere autenticación JWT y rol ADMINISTRADOR."
       tags:
         - "Máquinas"
       security:
@@ -1083,7 +1093,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     delete:
       summary: "Eliminar máquina por ID"
-      description: "Elimina una máquina del sistema por su ID. Requiere autenticación JWT."
+      description: "Elimina una máquina del sistema por su ID. Requiere autenticación JWT y rol ADMINISTRADOR."
       tags:
         - "Máquinas"
       security:
@@ -1126,7 +1136,7 @@ paths:
   /api/catservices:
     post:
       summary: "Crear un nuevo servicio de catálogo"
-      description: "Registra una nueva categoría de servicio para clasificar los tickets de soporte. Requiere autenticación JWT."
+      description: "Registra una nueva categoría de servicio para clasificar los tickets de soporte. Requiere autenticación JWT y rol ADMINISTRADOR."
       tags:
         - "Catálogo de Servicios"
       security:
@@ -1261,7 +1271,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       summary: "Actualizar servicio del catálogo por ID"
-      description: "Modifica el nombre o tipo del servicio de catálogo especificado por su ID. Requiere autenticación JWT."
+      description: "Modifica el nombre o tipo del servicio de catálogo especificado por su ID. Requiere autenticación JWT y rol ADMINISTRADOR."
       tags:
         - "Catálogo de Servicios"
       security:
@@ -1320,7 +1330,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     delete:
       summary: "Eliminar servicio del catálogo por ID"
-      description: "Elimina una categoría del catálogo de servicios. Requiere autenticación JWT."
+      description: "Elimina una categoría del catálogo de servicios. Requiere autenticación JWT y rol ADMINISTRADOR."
       tags:
         - "Catálogo de Servicios"
       security:
@@ -1420,7 +1430,8 @@ components:
           example: "2281234567"
         password:
           type: string
-          description: "Contraseña del usuario (encriptada con bcrypt)."
+          writeOnly: true
+          description: "Contraseña del usuario (encriptada con bcrypt). Solo se envía al crear/actualizar; nunca se incluye en las respuestas de la API."
           example: "$2a$10$X729x7b/H5gIq2pP5uO7eOd8Z..."
         fechaCreacion:
           type: string

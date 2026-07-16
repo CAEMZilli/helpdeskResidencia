@@ -6,13 +6,16 @@ import {
   updateMachine,
   deleteMachine,
 } from "../controllers/machineControllers";
+import { requireAdmin } from "../middleware/roleMiddleware";
 
 const router = Router();
 
-router.post("/", createMachine);
+// Gestión: solo administradores. Lectura: cualquier usuario autenticado
+// (el usuario elige su equipo al crear un ticket).
+router.post("/", requireAdmin, createMachine);
 router.get("/", getAllMachines);
 router.get("/:id", getMachineById);
-router.put("/:id", updateMachine);
-router.delete("/:id", deleteMachine);
+router.put("/:id", requireAdmin, updateMachine);
+router.delete("/:id", requireAdmin, deleteMachine);
 
 export default router;

@@ -5,14 +5,16 @@ import { createDepartment,
         findAllDepartments,
         updateDepartment,
  } from "../controllers/departmentControllers";
+import { requireAdmin } from "../middleware/roleMiddleware";
 
 const router = Router();
 
-
-router.post("/", createDepartment);
-router.delete("/:id", deleteDepartment);
+// Gestión: solo administradores. Lectura: cualquier usuario autenticado
+// (los selects de departamento se usan en varias pantallas por rol).
+router.post("/", requireAdmin, createDepartment);
+router.delete("/:id", requireAdmin, deleteDepartment);
+router.put("/:id", requireAdmin, updateDepartment);
 router.get("/:id", findDepartmentById);
 router.get("/", findAllDepartments);
-router.put("/:id", updateDepartment);
 
 export default router;
