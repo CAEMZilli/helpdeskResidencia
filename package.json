@@ -13,7 +13,7 @@
   "keywords": [],
   "author": "Carlos Emilio Sanchez Zilli, Edwing Josue Torres Delgado",
   "license": "ISC",
-  "type": "module",
+  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/CAEMZilli/helpdeskResidencia/issues"
   },

@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
     name: 'bienestarAPI',         // El nombre que verás al ejecutar 'pm2 list'
-    script: './dist/main.js',   // La ruta hacia tu archivo de entrada ya compilado
+    script: './dist/server.js',   // La ruta hacia tu archivo de entrada ya compilado
     instances: 1,                 // 1 instancia es lo ideal para tu vCPU actual
     autorestart: true,            // Si la API llega a caerse por un error, PM2 la levanta de inmediato
     watch: false,                 // Falso en producción (ahorra ciclos de CPU)
